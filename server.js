@@ -6,7 +6,6 @@ const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const { createClient } = require('@libsql/client');
 
-// NUOVO: Importiamo Cloudinary e Streamifier
 const cloudinary = require('cloudinary').v2;
 const streamifier = require('streamifier');
 
@@ -26,18 +25,15 @@ app.use(session({
     saveUninitialized: false
 }));
 
-// Multer continua a usare la memoria RAM
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-// NUOVO: Configurazione di Cloudinary con le chiavi segrete di Vercel
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-// Connessione a Turso
 const db = createClient({
     url: process.env.TURSO_DATABASE_URL,
     authToken: process.env.TURSO_AUTH_TOKEN,
@@ -125,40 +121,34 @@ app.get('/dashboard', async (req, res) => {
     }
 });
 
-// NUOVO: Rotta aggiornata per caricare l'immagine VERA su Cloudinary
 app.post('/add-project', upload.single('image'), async (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect('/login');
 
     const { title, description } = req.body;
 
     try {
-        // 1. Controlliamo se l'utente ha caricato un file
         if (!req.file) {
             return res.status(400).send("Devi caricare un'immagine!");
         }
 
-        // 2. Creiamo una funzione che spedisce l'immagine a Cloudinary
         const uploadToCloudinary = () => {
             return new Promise((resolve, reject) => {
                 const stream = cloudinary.uploader.upload_stream(
-                    { folder: "portfolio" }, // Crea una cartella "portfolio" su Cloudinary
+                    { folder: "portfolio" },
                     (error, result) => {
                         if (result) {
-                            resolve(result.secure_url); // Restituisce il link definitivo
+                            resolve(result.secure_url);
                         } else {
                             reject(error);
                         }
                     }
                 );
-                // Prende l'immagine dalla RAM e la invia nello stream
                 streamifier.createReadStream(req.file.buffer).pipe(stream);
             });
         };
 
-        // 3. Aspettiamo che Cloudinary finisca il lavoro e ci dia il link
         const finalImageUrl = await uploadToCloudinary();
 
-        // 4. Salviamo il progetto su Turso usando il link vero e proprio!
         await db.execute(`INSERT INTO projects (title, description, image_url, featured) VALUES (?, ?, ?, 0)`,
             [title, description, finalImageUrl]
         );
@@ -167,6 +157,21 @@ app.post('/add-project', upload.single('image'), async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).send("Errore durante l'aggiunta del progetto.");
+    }
+});
+
+// NUOVO: La rotta mancante per eliminare i progetti!
+app.post('/delete-project/:id', async (req, res) => {
+    if (!req.session.isLoggedIn) return res.redirect('/login');
+
+    const projectId = req.params.id;
+
+    try {
+        await db.execute(`DELETE FROM projects WHERE id = ?`, [projectId]);
+        res.redirect('/dashboard');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Errore durante l'eliminazione del progetto.");
     }
 });
 

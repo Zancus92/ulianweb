@@ -212,7 +212,11 @@
                         <div class="project-actions">
                             <button class="btn-action btn-star <%= project.featured ? 'active' : '' %>" onclick="toggleStar(this)" title="Metti in evidenza">⭐</button>
                             <button class="btn-action" title="Modifica">✏️</button>
-                            <button class="btn-action btn-delete" onclick="deleteProject(this)" title="Elimina">🗑️</button>
+
+                            <form action="/delete-project/<%= project.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Sei sicuro di voler eliminare questo progetto? Questa azione è irreversibile.');">
+                                <button type="submit" class="btn-action btn-delete" title="Elimina">🗑️</button>
+                            </form>
+
                         </div>
                     </li>
                 <% }); %>
@@ -236,16 +240,6 @@
         button.classList.toggle('active');
         // NOTA: Qui in futuro andrà inserita la chiamata fetch() al server per salvare la modifica
         console.log("Stato 'In Evidenza' cambiato!");
-    }
-
-    // Funzione per il tasto "Elimina"
-    function deleteProject(button) {
-        if (confirm("Sei sicuro di voler eliminare questo progetto? Questa azione è irreversibile.")) {
-            const projectItem = button.closest('.project-item');
-            projectItem.remove(); // Rimuove l'elemento dallo schermo
-            // NOTA: Qui in futuro andrà inserita la chiamata fetch() al server per eliminare dal database
-            console.log("Progetto eliminato visivamente!");
-        }
     }
 
     // Logica per il Drag & Drop (Riordinamento)

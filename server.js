@@ -4,8 +4,6 @@ const multer = require('multer');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
-
-// NUOVO: Importiamo il connettore cloud di Turso al posto di sqlite3
 const { createClient } = require('@libsql/client');
 
 const app = express();
@@ -14,10 +12,9 @@ const PORT = process.env.PORT || 3000;
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
-
-// Diciamo al server dove trovare la cartella delle viste in modo sicuro
 app.set('views', path.join(__dirname, 'views'));
 
+// Chiave sicura per le sessioni
 const secretKey = crypto.randomBytes(32).toString('hex');
 
 app.use(session({
@@ -26,25 +23,19 @@ app.use(session({
     saveUninitialized: false
 }));
 
-const storage = multer.diskStorage({
-    destination: './public/uploads/',
-    filename: function(req, file, cb) {
-        cb(null, Date.now() + path.extname(file.originalname));
-    }
-});
+// SOLUZIONE VERCEL: Usiamo la memoria RAM invece del disco fisso per evitare crash
+const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-// NUOVO: Connessione al database Cloud Turso
-// Vercel inserirà automaticamente questi valori dalle "Environment Variables"
+// Connessione al database Cloud Turso (legge i segreti da Vercel)
 const db = createClient({
     url: process.env.TURSO_DATABASE_URL,
     authToken: process.env.TURSO_AUTH_TOKEN,
 });
 
-// NUOVO: Funzione asincrona per creare le tabelle all'avvio
+// Funzione per preparare il database all'avvio
 async function inizializzaDatabase() {
     try {
-        // Creazione tabella projects
         await db.execute(`CREATE TABLE IF NOT EXISTS projects (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT,
@@ -53,20 +44,17 @@ async function inizializzaDatabase() {
             featured INTEGER DEFAULT 0
         )`);
 
-        // Creazione tabella users
         await db.execute(`CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE,
             password TEXT
         )`);
 
-        // Controllo se esiste l'admin usando la nuova sintassi di Turso (.rows)
         const adminCheck = await db.execute(`SELECT * FROM users WHERE username = 'admin'`);
 
         if (adminCheck.rows.length === 0) {
             const passwordInChiaro = 'admin123';
             const hash = await bcrypt.hash(passwordInChiaro, 10);
-
             await db.execute(`INSERT INTO users (username, password) VALUES (?, ?)`, ['admin', hash]);
             console.log("✅ Utente 'admin' creato con password protetta nel database cloud!");
         }
@@ -76,16 +64,14 @@ async function inizializzaDatabase() {
     }
 }
 
-// Avviamo l'inizializzazione
 inizializzaDatabase();
 
-
-// --- ROTTE (Pagine del sito) aggiornate con async/await ---
+// --- ROTTE DEL SITO ---
 
 app.get('/', async (req, res) => {
     try {
         const result = await db.execute("SELECT * FROM projects ORDER BY id DESC");
-        res.render('index', { projects: result.rows }); // Turso restituisce i dati dentro .rows
+        res.render('index', { projects: result.rows });
     } catch (err) {
         console.error(err);
         res.status(500).send("Errore nel caricamento dei progetti.");
@@ -100,16 +86,13 @@ app.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
     try {
-        // 1. Cerchiamo l'utente
         const result = await db.execute(`SELECT * FROM users WHERE username = ?`, [username]);
-        const user = result.rows[0]; // Prendiamo il primo risultato
+        const user = result.rows[0];
 
-        // 2. Se l'utente non esiste
         if (!user) {
             return res.send("Credenziali errate. <a href='/login'>Riprova</a>");
         }
 
-        // 3. Confrontiamo la password
         const isMatch = await bcrypt.compare(password, user.password);
         if (isMatch) {
             req.session.isLoggedIn = true;
@@ -141,7 +124,9 @@ app.post('/add-project', upload.single('image'), async (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect('/login');
 
     const { title, description } = req.body;
-    const imageUrl = '/uploads/' + req.file.filename;
+
+    // Immagine segnaposto fissa per Vercel
+    const imageUrl = 'https://via.placeholder.com/600x400?text=Immagine+Progetto';
 
     try {
         await db.execute(`INSERT INTO projects (title, description, image_url, featured) VALUES (?, ?, ?, 0)`,

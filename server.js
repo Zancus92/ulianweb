@@ -138,3 +138,4 @@ app.post('/add-project', upload.single('image'), (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 Server avviato su http://localhost:${PORT}`);
 });
+module.exports = app;

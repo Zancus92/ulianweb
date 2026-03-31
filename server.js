@@ -1,23 +1,27 @@
 const express = require('express');
 const session = require('express-session');
 const multer = require('multer');
-const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
-const bcrypt = require('bcrypt'); // <--- NUOVO: Libreria per nascondere la password
-const crypto = require('crypto'); // <--- NUOVO: Per generare chiavi di sicurezza casuali
+const bcrypt = require('bcrypt');
+const crypto = require('crypto');
+
+// NUOVO: Importiamo il connettore cloud di Turso al posto di sqlite3
+const { createClient } = require('@libsql/client');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
 
-// NUOVO: Generiamo una chiave segreta robusta per la sessione ogni volta che il server parte
+// Diciamo al server dove trovare la cartella delle viste in modo sicuro
+app.set('views', path.join(__dirname, 'views'));
+
 const secretKey = crypto.randomBytes(32).toString('hex');
 
 app.use(session({
-    secret: secretKey, // Usa la chiave ultra-sicura
+    secret: secretKey,
     resave: false,
     saveUninitialized: false
 }));
@@ -30,112 +34,128 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-const db = new sqlite3.Database('./portfolio.db', (err) => {
-    if (err) console.error("Errore database:", err.message);
-    else console.log("Database connesso.");
+// NUOVO: Connessione al database Cloud Turso
+// Vercel inserirà automaticamente questi valori dalle "Environment Variables"
+const db = createClient({
+    url: process.env.TURSO_DATABASE_URL,
+    authToken: process.env.TURSO_AUTH_TOKEN,
 });
 
-// Creazione della tabella per i progetti (Aggiornata per la dashboard)
-db.run(`CREATE TABLE IF NOT EXISTS projects (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT,
-    description TEXT,
-    image_url TEXT,
-    featured INTEGER DEFAULT 0 -- 0 significa 'non in evidenza', 1 'in evidenza'
-)`);
+// NUOVO: Funzione asincrona per creare le tabelle all'avvio
+async function inizializzaDatabase() {
+    try {
+        // Creazione tabella projects
+        await db.execute(`CREATE TABLE IF NOT EXISTS projects (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT,
+            description TEXT,
+            image_url TEXT,
+            featured INTEGER DEFAULT 0
+        )`);
 
-// NUOVO: Creazione della tabella per gli utenti
-db.run(`CREATE TABLE IF NOT EXISTS users (
-                                             id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                             username TEXT UNIQUE,
-                                             password TEXT
-        )`, () => {
-    // Quando la tabella è pronta, controlliamo se esiste già l'amministratore
-    db.get(`SELECT * FROM users WHERE username = 'admin'`, (err, row) => {
-        if (!row) {
-            // Se non esiste, lo creiamo noi criptando la password!
-            const passwordInChiaro = 'admin123'; // Potrai cambiarla in futuro
+        // Creazione tabella users
+        await db.execute(`CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE,
+            password TEXT
+        )`);
 
-            bcrypt.hash(passwordInChiaro, 10, (err, hash) => {
-                if (err) console.error("Errore hashing password:", err);
-                else {
-                    db.run(`INSERT INTO users (username, password) VALUES (?, ?)`, ['admin', hash]);
-                    console.log("✅ Utente 'admin' creato con password protetta nel database!");
-                }
-            });
+        // Controllo se esiste l'admin usando la nuova sintassi di Turso (.rows)
+        const adminCheck = await db.execute(`SELECT * FROM users WHERE username = 'admin'`);
+
+        if (adminCheck.rows.length === 0) {
+            const passwordInChiaro = 'admin123';
+            const hash = await bcrypt.hash(passwordInChiaro, 10);
+
+            await db.execute(`INSERT INTO users (username, password) VALUES (?, ?)`, ['admin', hash]);
+            console.log("✅ Utente 'admin' creato con password protetta nel database cloud!");
         }
-    });
-});
+        console.log("✅ Connessione a Turso stabilita e tabelle pronte!");
+    } catch (err) {
+        console.error("❌ Errore durante l'inizializzazione del database:", err.message);
+    }
+}
 
-// --- ROTTE (Pagine del sito) ---
+// Avviamo l'inizializzazione
+inizializzaDatabase();
 
-app.get('/', (req, res) => {
-    db.all("SELECT * FROM projects ORDER BY id DESC", [], (err, rows) => {
-        if (err) throw err;
-        res.render('index', { projects: rows });
-    });
+
+// --- ROTTE (Pagine del sito) aggiornate con async/await ---
+
+app.get('/', async (req, res) => {
+    try {
+        const result = await db.execute("SELECT * FROM projects ORDER BY id DESC");
+        res.render('index', { projects: result.rows }); // Turso restituisce i dati dentro .rows
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Errore nel caricamento dei progetti.");
+    }
 });
 
 app.get('/login', (req, res) => {
     res.render('login');
 });
 
-// NUOVO: Rotta di Login aggiornata e sicura
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
-    // 1. Cerchiamo l'utente nel database
-    db.get(`SELECT * FROM users WHERE username = ?`, [username], (err, user) => {
-        if (err) return res.send("Errore del server.");
+    try {
+        // 1. Cerchiamo l'utente
+        const result = await db.execute(`SELECT * FROM users WHERE username = ?`, [username]);
+        const user = result.rows[0]; // Prendiamo il primo risultato
 
         // 2. Se l'utente non esiste
         if (!user) {
             return res.send("Credenziali errate. <a href='/login'>Riprova</a>");
         }
 
-        // 3. Se esiste, confrontiamo la password digitata con l'hash salvato
-        bcrypt.compare(password, user.password, (err, isMatch) => {
-            if (isMatch) {
-                // Password corretta!
-                req.session.isLoggedIn = true;
-                res.redirect('/dashboard');
-            } else {
-                // Password sbagliata
-                res.send("Credenziali errate. <a href='/login'>Riprova</a>");
-            }
-        });
-    });
+        // 3. Confrontiamo la password
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (isMatch) {
+            req.session.isLoggedIn = true;
+            res.redirect('/dashboard');
+        } else {
+            res.send("Credenziali errate. <a href='/login'>Riprova</a>");
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Errore del server durante il login.");
+    }
 });
 
-app.get('/dashboard', (req, res) => {
+app.get('/dashboard', async (req, res) => {
     if (!req.session.isLoggedIn) {
         return res.redirect('/login');
     }
 
-    // NUOVO: Passiamo i progetti alla dashboard in modo che la lista funzioni
-    db.all("SELECT * FROM projects ORDER BY id DESC", [], (err, rows) => {
-        if (err) throw err;
-        res.render('dashboard', { projects: rows });
-    });
+    try {
+        const result = await db.execute("SELECT * FROM projects ORDER BY id DESC");
+        res.render('dashboard', { projects: result.rows });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Errore nel caricamento della dashboard.");
+    }
 });
 
-app.post('/add-project', upload.single('image'), (req, res) => {
+app.post('/add-project', upload.single('image'), async (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect('/login');
 
     const { title, description } = req.body;
     const imageUrl = '/uploads/' + req.file.filename;
 
-    // Inseriamo il progetto (di default 'featured' è 0)
-    db.run(`INSERT INTO projects (title, description, image_url, featured) VALUES (?, ?, ?, 0)`,
-        [title, description, imageUrl],
-        function(err) {
-            if (err) return console.error(err.message);
-            res.redirect('/dashboard'); // Torniamo alla dashboard così vedi il progetto appena aggiunto!
-        }
-    );
+    try {
+        await db.execute(`INSERT INTO projects (title, description, image_url, featured) VALUES (?, ?, ?, 0)`,
+            [title, description, imageUrl]
+        );
+        res.redirect('/dashboard');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Errore durante l'aggiunta del progetto.");
+    }
 });
 
 app.listen(PORT, () => {
-    console.log(`🚀 Server avviato su http://localhost:${PORT}`);
+    console.log(`🚀 Server avviato sulla porta ${PORT}`);
 });
+
 module.exports = app;

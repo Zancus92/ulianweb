@@ -17,7 +17,7 @@
             --card-border: rgba(255,255,255,0.08);
             --text: #f5f5f7;
             --muted: #b7b7c0;
-            --accent: #ff5f87; /* Rosa acceso */
+            --accent: #ff5f87;
             --accent-2: #ff7aa1;
             --gold: #ffd700;
             --white: #ffffff;
@@ -52,13 +52,24 @@
             pointer-events: none; transform: translate(-50%, -50%); z-index: 0; filter: blur(18px);
         }
 
+        /* 🔴 NUOVO: Barra di Scorrimento in alto */
+        #progress-bar {
+            position: fixed; top: 0; left: 0; width: 0%; height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--gold));
+            z-index: 9999; transition: width 0.1s ease;
+        }
+
         /* =========================================
            HEADER E NAVIGAZIONE
            ========================================= */
         header {
             position: sticky; top: 0; z-index: 30; backdrop-filter: blur(14px);
             background: rgba(10,10,13,0.55); border-bottom: 1px solid rgba(255,255,255,0.06);
+            /* 🔴 NUOVO: Transizione per l'Header Intelligente */
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
         }
+        header.hide { transform: translateY(-100%); } /* Classe aggiunta via JS */
+
         .nav {
             max-width: var(--max); margin: 0 auto; padding: 16px 20px;
             display: flex; align-items: center; justify-content: space-between; gap: 20px;
@@ -66,8 +77,15 @@
         .brand { display: flex; align-items: center; gap: 14px; font-weight: 700; }
         .brand-text span { display: block; font-size: 0.8rem; color: var(--muted); font-weight: 500; }
         .nav-links { display: flex; gap: 18px; }
-        .nav-links a { color: var(--muted); font-size: 0.95rem; transition: 0.25s ease; }
+        .nav-links a { color: var(--muted); font-size: 0.95rem; transition: 0.25s ease; position: relative; }
         .nav-links a:hover { color: var(--white); }
+
+        /* 🔴 NUOVO: Sottolineatura animata nei link della navbar */
+        .nav-links a::after {
+            content: ''; position: absolute; width: 0; height: 2px; bottom: -4px; left: 0;
+            background-color: var(--accent); transition: width 0.3s ease;
+        }
+        .nav-links a:hover::after { width: 100%; }
 
         /* =========================================
            COMPONENTI COMUNI
@@ -89,19 +107,19 @@
         .btn {
             display: inline-flex; align-items: center; justify-content: center; gap: 10px;
             padding: 14px 22px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.08);
-            transition: all 0.25s ease; font-weight: 700;
+            font-weight: 700; cursor: pointer;
+            /* La transizione viene gestita da JS per l'effetto magnetico */
         }
         .btn-primary {
             background: linear-gradient(135deg, var(--accent), var(--accent-2)); border: none;
             box-shadow: 0 12px 30px rgba(255,95,135,0.25);
         }
-        .btn:hover { transform: translateY(-3px); opacity: 0.9; }
 
         /* =========================================
            SEZIONE HERO
            ========================================= */
-        .hero { min-height: 80vh; display: flex; align-items: center; }
-        .hero-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 40px; align-items: center; }
+        .hero { min-height: 80vh; display: flex; align-items: center; position: relative; }
+        .hero-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 40px; align-items: center; width: 100%; }
         h1 { font-size: clamp(2.6rem, 7vw, 5rem); line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 22px; }
         .hero p { font-size: 1.08rem; color: var(--muted); max-width: 640px; margin-bottom: 30px; }
         .hero-card {
@@ -110,47 +128,45 @@
             box-shadow: var(--shadow); overflow: hidden; transform-style: preserve-3d;
         }
 
+        /* 🔴 NUOVO: Indicatore di scroll animato (Mouse) */
+        .scroll-down {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em;
+            opacity: 0.7; pointer-events: none;
+        }
+        .mouse-icon {
+            width: 22px; height: 34px; border: 2px solid var(--muted); border-radius: 20px; position: relative;
+        }
+        .mouse-wheel {
+            width: 4px; height: 6px; background: var(--accent); border-radius: 2px;
+            position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
+            animation: scrollWheel 1.5s infinite;
+        }
+        @keyframes scrollWheel { 0% { top: 6px; opacity: 1; } 100% { top: 18px; opacity: 0; } }
+
         /* =========================================
            SEZIONE CHI SIAMO (STUDIO)
            ========================================= */
         .about-grid {
-            display: grid;
-            grid-template-columns: 0.9fr 1.1fr;
-            gap: 60px;
-            align-items: center;
+            display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 60px; align-items: center;
         }
         .about-content h2 { font-size: clamp(2rem, 4vw, 3rem); line-height: 1.1; margin-bottom: 24px; }
         .about-content p { color: var(--muted); font-size: 1.1rem; margin-bottom: 20px; }
 
         .about-image-wrapper {
-            position: relative;
-            border-radius: 30px;
-            padding: 10px;
-            border: 1px solid rgba(255, 95, 135, 0.3);
-            background: rgba(255, 255, 255, 0.02);
+            position: relative; border-radius: 30px; padding: 10px;
+            border: 1px solid rgba(255, 95, 135, 0.3); background: rgba(255, 255, 255, 0.02);
         }
         .about-image-wrapper img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 22px;
-            display: block;
-            filter: grayscale(20%);
-            transition: filter 0.5s ease;
+            width: 100%; height: 100%; object-fit: cover; border-radius: 22px; display: block;
+            filter: grayscale(20%); transition: filter 0.5s ease;
         }
         .about-image-wrapper:hover img { filter: grayscale(0%); }
-
         .about-image-wrapper::after {
-            content: "";
-            position: absolute;
-            z-index: -1;
-            top: 20px;
-            left: -20px;
-            width: 100%;
-            height: 100%;
-            border: 1px solid rgba(255, 95, 135, 0.1);
-            border-radius: 30px;
-            pointer-events: none;
+            content: ""; position: absolute; z-index: -1; top: 20px; left: -20px;
+            width: 100%; height: 100%; border: 1px solid rgba(255, 95, 135, 0.1);
+            border-radius: 30px; pointer-events: none;
         }
 
         /* =========================================
@@ -189,14 +205,15 @@
         .modal-content {
             background: var(--bg-soft); border: 1px solid var(--card-border); border-radius: var(--radius);
             width: 90%; max-width: 900px; max-height: 90vh; overflow-y: auto; position: relative;
-            transform: translateY(30px); transition: transform 0.3s ease;
+            transform: translateY(30px); transition: transform 0.4s cubic-bezier(0.2, 1, 0.3, 1);
         }
         .modal.show .modal-content { transform: translateY(0); }
         .close-modal {
             position: absolute; top: 20px; right: 25px; color: var(--muted); font-size: 35px; cursor: pointer;
             z-index: 10; background: rgba(0,0,0,0.5); width: 45px; height: 45px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
+            display: flex; align-items: center; justify-content: center; transition: all 0.2s;
         }
+        .close-modal:hover { color: var(--white); background: var(--accent); transform: scale(1.1); }
         .modal-image { width: 100%; max-height: 60vh; object-fit: cover; border-bottom: 1px solid var(--card-border); }
         .modal-body { padding: 40px; }
 
@@ -211,14 +228,17 @@
             .about-grid { display: flex; flex-direction: column-reverse; }
             h1 { font-size: 3rem; }
             .nav { flex-direction: column; }
+            .scroll-down { display: none; } /* Nascondiamo su mobile per risparmiare spazio */
         }
     </style>
 </head>
 <body>
+<div id="progress-bar"></div>
+
 <div class="noise"></div>
 <div class="cursor-glow" id="cursorGlow"></div>
 
-<header>
+<header id="main-header">
     <nav class="nav">
         <a href="/" class="brand">
             <div class="brand-text">
@@ -242,7 +262,7 @@
                     <div class="eyebrow">Fotografia & Social Media</div>
                     <h1>Contenuti <span class="gradient-text">visivi</span><br />che lasciano il segno.</h1>
                     <p>Servizi esclusivi di fotografia e direzione creativa per brand che puntano all'eccellenza.</p>
-                    <a href="#portfolio" class="btn btn-primary">Esplora il Portfolio</a>
+                    <a href="#portfolio" class="btn btn-primary magnetic">Esplora il Portfolio</a>
                 </div>
                 <div class="hero-card reveal" id="tiltCard">
                     <div class="mini-label">Servizi Esclusivi</div>
@@ -251,19 +271,26 @@
                 </div>
             </div>
         </div>
+
+        <div class="scroll-down">
+            <span>Scroll</span>
+            <div class="mouse-icon">
+                <div class="mouse-wheel"></div>
+            </div>
+        </div>
     </section>
 
     <section id="about">
         <div class="container">
             <div class="about-grid">
                 <div class="about-image-wrapper reveal">
-                    <img src="<%= about.image_url %>" alt="ULiAN Studio">
+                    <img src="<%= typeof about !== 'undefined' ? about.image_url : 'https://via.placeholder.com/600x800' %>" alt="ULiAN Studio">
                 </div>
                 <div class="about-content reveal">
                     <div class="eyebrow">L'Essenza dello Studio</div>
-                    <h2><%= about.title %></h2>
-                    <p style="white-space: pre-wrap;"><%= about.description %></p>
-                    <a href="#portfolio" class="btn">Scopri il metodo</a>
+                    <h2><%= typeof about !== 'undefined' ? about.title : 'Titolo Studio' %></h2>
+                    <p style="white-space: pre-wrap;"><%= typeof about !== 'undefined' ? about.description : 'Descrizione...' %></p>
+                    <a href="#portfolio" class="btn magnetic">Scopri il metodo</a>
                 </div>
             </div>
         </div>
@@ -309,22 +336,25 @@
 <footer>
     <div class="footer-inner">
         <div>© 2026 ULiAN Studio.</div>
-        <a href="/login" class="admin-link">⚙️ Accesso Amministratore</a>
+        <a href="/login" class="admin-link magnetic">⚙️ Accesso Amministratore</a>
     </div>
 </footer>
 
 <script>
+    // 1. ANIMAZIONE DI SCORRIMENTO (Fade Up)
     const reveals = document.querySelectorAll('.reveal');
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
     }, { threshold: 0.15 });
     reveals.forEach(el => observer.observe(el));
 
+    // 2. CURSORE LUMINOSO GLOBALE
     const glow = document.getElementById('cursorGlow');
     window.addEventListener('mousemove', (e) => {
         glow.style.left = e.clientX + 'px'; glow.style.top = e.clientY + 'px';
     });
 
+    // 3. EFFETTO TILT CARD (Hero)
     const tiltCard = document.getElementById('tiltCard');
     tiltCard.addEventListener('mousemove', (e) => {
         const rect = tiltCard.getBoundingClientRect();
@@ -334,6 +364,7 @@
     });
     tiltCard.addEventListener('mouseleave', () => { tiltCard.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)'; });
 
+    // 4. GESTIONE MODAL
     const modal = document.getElementById("projectModal");
     function openModal(title, description, imageUrl) {
         document.getElementById("modalTitle").innerText = title;
@@ -346,6 +377,48 @@
         setTimeout(() => { document.getElementById("modalImg").src = ""; }, 300);
     }
     window.onclick = (e) => { if (e.target == modal) closeModal(); }
+
+    // =========================================
+    // 🔴 NUOVI SCRIPT PER FUNZIONI AVANZATE
+    // =========================================
+
+    // 5. PROGRESS BAR DELLA LETTURA
+    window.addEventListener('scroll', () => {
+        const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const scrolled = (winScroll / height) * 100;
+        document.getElementById("progress-bar").style.width = scrolled + "%";
+    });
+
+    // 6. HEADER INTELLIGENTE (Nascondi giù, Mostra su)
+    let lastScrollTop = 0;
+    const header = document.getElementById('main-header');
+    window.addEventListener('scroll', () => {
+        let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        if (scrollTop > lastScrollTop && scrollTop > 100) {
+            header.classList.add('hide'); // Scorrendo giù, nascondi
+        } else {
+            header.classList.remove('hide'); // Scorrendo su, mostra
+        }
+        lastScrollTop = scrollTop;
+    });
+
+    // 7. BOTTONI MAGNETICI
+    const magnets = document.querySelectorAll('.magnetic');
+    magnets.forEach(btn => {
+        btn.addEventListener('mousemove', (e) => {
+            btn.style.transition = 'none'; // Togliamo la transizione per renderlo fluido al mouse
+            const rect = btn.getBoundingClientRect();
+            // Calcoliamo la distanza dal centro del bottone
+            const x = (e.clientX - rect.left - rect.width / 2) * 0.3;
+            const y = (e.clientY - rect.top - rect.height / 2) * 0.3;
+            btn.style.transform = `translate(${x}px, ${y}px)`;
+        });
+        btn.addEventListener('mouseleave', () => {
+            btn.style.transition = 'transform 0.4s cubic-bezier(0.2, 1, 0.3, 1)'; // Rimettiamo la transizione elastica
+            btn.style.transform = `translate(0px, 0px)`; // Torna in posizione originale
+        });
+    });
 </script>
 </body>
 </html>

@@ -56,20 +56,19 @@ const uploadToCloudinary = (fileBuffer, folder) => {
 async function inizializzaDatabase() {
     try {
         await db.execute(`CREATE TABLE IF NOT EXISTS projects (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT,
-            description TEXT,
-            image_url TEXT,
-            featured INTEGER DEFAULT 0
-        )`);
+                                                                  id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                                                  title TEXT,
+                                                                  description TEXT,
+                                                                  image_url TEXT,
+                                                                  featured INTEGER DEFAULT 0
+                          )`);
 
         await db.execute(`CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE,
-            password TEXT
-        )`);
+                                                               id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                                               username TEXT UNIQUE,
+                                                               password TEXT
+                          )`);
 
-        // 🔴 NUOVO: Tabella per la sezione About (singola riga con ID 1)
         await db.execute(`CREATE TABLE IF NOT EXISTS about (
             id INTEGER PRIMARY KEY,
             title TEXT,
@@ -77,10 +76,28 @@ async function inizializzaDatabase() {
             image_url TEXT
         )`);
 
-        // Inizializza i dati About se non esistono
+        // 🔴 NUOVO: Tabella per i Servizi Offerti
+        await db.execute(`CREATE TABLE IF NOT EXISTS services (
+                                                                  id INTEGER PRIMARY KEY,
+                                                                  title TEXT,
+                                                                  icon TEXT,
+                                                                  description TEXT,
+                                                                  tags TEXT
+                          )`);
+
         const aboutCheck = await db.execute(`SELECT * FROM about WHERE id = 1`);
         if (aboutCheck.rows.length === 0) {
             await db.execute(`INSERT INTO about (id, title, description, image_url) VALUES (1, 'Titolo di Esempio', 'Descrizione dello studio...', 'https://via.placeholder.com/800x600')`);
+        }
+
+        // 🔴 NUOVO: Popoliamo i 4 servizi iniziali se la tabella è vuota
+        const servicesCheck = await db.execute(`SELECT * FROM services`);
+        if (servicesCheck.rows.length === 0) {
+            await db.execute(`INSERT INTO services (id, title, icon, description, tags) VALUES (1, 'Produzione Video', '🎬', 'Video cinematografici di alto livello per brand, aziende e artisti. Dal concept alla post-produzione, creiamo immagini che parlano e che rimangono impressi.', 'Spot TV, Brand Film, Documentari, Social Content')`);
+            await db.execute(`INSERT INTO services (id, title, icon, description, tags) VALUES (2, 'Siti Web', '🌐', 'Design e sviluppo di siti web su misura, veloci, eleganti e ottimizzati. Esperienze digitali che convertono visitatori in clienti.', 'Landing Page, E-commerce, Portfolio, Web App')`);
+            await db.execute(`INSERT INTO services (id, title, icon, description, tags) VALUES (3, 'Motion Design', '🎨', 'Animazioni, titoli cinematografici e grafiche in movimento che aggiungono profondità e stile professionale a ogni produzione.', 'Animazioni 2D/3D, VFX, Titoli, Infografiche')`);
+            await db.execute(`INSERT INTO services (id, title, icon, description, tags) VALUES (4, 'Post-Produzione', '🎞️', 'Montaggio cinematografico, color grading professionale e sound design per materiale già girato che necessita di quel tocco definitivo.', 'Montaggio, Color Grading, Sound Design, DCP')`);
+            console.log("✅ Tabella Servizi inizializzata con i 4 default!");
         }
 
         const adminCheck = await db.execute(`SELECT * FROM users WHERE username = 'admin'`);
@@ -104,11 +121,13 @@ app.get('/', async (req, res) => {
     try {
         const projectsResult = await db.execute("SELECT * FROM projects ORDER BY id DESC");
         const aboutResult = await db.execute("SELECT * FROM about WHERE id = 1");
+        // Preleviamo i servizi dal DB
+        const servicesResult = await db.execute("SELECT * FROM services ORDER BY id ASC");
 
-        // Passiamo sia i progetti che i dati about all'index
         res.render('index', {
             projects: projectsResult.rows,
-            about: aboutResult.rows[0]
+            about: aboutResult.rows[0],
+            services: servicesResult.rows // Inviati al frontend!
         });
     } catch (err) {
         console.error(err);
@@ -139,15 +158,16 @@ app.get('/dashboard', async (req, res) => {
     try {
         const projectsResult = await db.execute("SELECT * FROM projects ORDER BY id DESC");
         const aboutResult = await db.execute("SELECT * FROM about WHERE id = 1");
+        const servicesResult = await db.execute("SELECT * FROM services ORDER BY id ASC");
 
         res.render('dashboard', {
             projects: projectsResult.rows,
-            about: aboutResult.rows[0] // Passiamo i dati attuali al form
+            about: aboutResult.rows[0],
+            services: servicesResult.rows // Passati anche alla dashboard
         });
     } catch (err) { res.status(500).send("Errore dashboard."); }
 });
 
-// 🔴 NUOVO: Rotta per aggiornare la sezione About
 app.post('/update-about', upload.single('about_image'), async (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect('/login');
     const { about_title, about_description } = req.body;
@@ -155,7 +175,6 @@ app.post('/update-about', upload.single('about_image'), async (req, res) => {
     try {
         let finalImageUrl = null;
 
-        // Se l'utente carica una nuova foto
         if (req.file) {
             finalImageUrl = await uploadToCloudinary(req.file.buffer, "studio");
             await db.execute(
@@ -163,7 +182,6 @@ app.post('/update-about', upload.single('about_image'), async (req, res) => {
                 [about_title, about_description, finalImageUrl]
             );
         } else {
-            // Se non carica foto, aggiorniamo solo i testi
             await db.execute(
                 `UPDATE about SET title = ?, description = ? WHERE id = 1`,
                 [about_title, about_description]
@@ -173,6 +191,32 @@ app.post('/update-about', upload.single('about_image'), async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).send("Errore durante l'aggiornamento della sezione Studio.");
+    }
+});
+
+// 🔴 NUOVO: Rotta per salvare i 4 Servizi
+app.post('/update-services', async (req, res) => {
+    if (!req.session.isLoggedIn) return res.redirect('/login');
+
+    // Estraiamo i dati dal form della dashboard
+    const {
+        s1_title, s1_icon, s1_desc, s1_tags,
+        s2_title, s2_icon, s2_desc, s2_tags,
+        s3_title, s3_icon, s3_desc, s3_tags,
+        s4_title, s4_icon, s4_desc, s4_tags
+    } = req.body;
+
+    try {
+        // Aggiorniamo le 4 righe nel database in sequenza
+        await db.execute(`UPDATE services SET title = ?, icon = ?, description = ?, tags = ? WHERE id = 1`, [s1_title, s1_icon, s1_desc, s1_tags]);
+        await db.execute(`UPDATE services SET title = ?, icon = ?, description = ?, tags = ? WHERE id = 2`, [s2_title, s2_icon, s2_desc, s2_tags]);
+        await db.execute(`UPDATE services SET title = ?, icon = ?, description = ?, tags = ? WHERE id = 3`, [s3_title, s3_icon, s3_desc, s3_tags]);
+        await db.execute(`UPDATE services SET title = ?, icon = ?, description = ?, tags = ? WHERE id = 4`, [s4_title, s4_icon, s4_desc, s4_tags]);
+
+        res.redirect('/dashboard');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Errore durante l'aggiornamento dei servizi.");
     }
 });
 

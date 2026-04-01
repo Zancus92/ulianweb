@@ -6,167 +6,47 @@
     <title>ULiAN | Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* =========================================
-           VARIABILI E TEMA DARK (Sincronizzato col sito)
-           ========================================= */
         :root {
-            --bg: #0a0a0d;
-            --bg-soft: #121218;
-            --card: rgba(255,255,255,0.03);
-            --card-border: rgba(255,255,255,0.08);
-            --text: #f5f5f7;
-            --muted: #b7b7c0;
-            --accent: #ff5f87;
-            --accent-2: #ff7aa1;
-            --danger: #ff4757;
-            --success: #2ed573;
-            --radius: 16px;
+            --bg: #0a0a0d; --bg-soft: #121218; --card: rgba(255,255,255,0.03);
+            --card-border: rgba(255,255,255,0.08); --text: #f5f5f7; --muted: #b7b7c0;
+            --accent: #ff5f87; --accent-2: #ff7aa1; --danger: #ff4757; --success: #2ed573; --radius: 16px;
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background:
-                    radial-gradient(circle at top right, rgba(255,95,135,0.08), transparent 25%),
-                    var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 2rem;
-            min-height: 100vh;
-        }
-
-        /* Effetto Rumore (Noise) di sfondo */
-        .noise {
-            position: fixed; inset: 0; pointer-events: none; opacity: 0.035;
-            background-image: radial-gradient(circle, #fff 0.8px, transparent 0.8px);
-            background-size: 12px 12px; z-index: -1;
-        }
-
-        .header-dashboard {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
+        body { font-family: 'Inter', sans-serif; background: radial-gradient(circle at top right, rgba(255,95,135,0.08), transparent 25%), var(--bg); color: var(--text); margin: 0; padding: 2rem; min-height: 100vh; }
+        .noise { position: fixed; inset: 0; pointer-events: none; opacity: 0.035; background-image: radial-gradient(circle, #fff 0.8px, transparent 0.8px); background-size: 12px 12px; z-index: -1; }
+        .header-dashboard { text-align: center; margin-bottom: 3rem; }
         .header-dashboard h1 { margin: 0; color: var(--text); font-size: 2.5rem; letter-spacing: -0.03em; }
         .header-dashboard p { color: var(--muted); margin-top: 5px; }
 
-        .dashboard-wrapper {
-            max-width: 1200px;
-            margin: auto;
-            display: grid;
-            grid-template-columns: 1fr 1.5fr;
-            gap: 2rem;
-        }
+        .dashboard-wrapper { max-width: 1200px; margin: auto; display: grid; grid-template-columns: 1fr 1.5fr; gap: 2rem; }
+        .full-width { grid-column: 1 / -1; margin-bottom: 1rem; }
 
-        .full-width {
-            grid-column: 1 / -1;
-            margin-bottom: 1rem;
-        }
+        .dashboard-box { background: var(--card); border: 1px solid var(--card-border); backdrop-filter: blur(10px); padding: 2.5rem; border-radius: var(--radius); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .dashboard-box h2 { margin-top: 0; font-size: 1.3rem; border-bottom: 1px solid var(--card-border); padding-bottom: 15px; margin-bottom: 25px; display: flex; align-items: center; gap: 12px; color: var(--white); }
 
-        /* Stile delle Box "Glassmorphism" */
-        .dashboard-box {
-            background: var(--card);
-            border: 1px solid var(--card-border);
-            backdrop-filter: blur(10px);
-            padding: 2.5rem;
-            border-radius: var(--radius);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        .dashboard-box h2 {
-            margin-top: 0;
-            font-size: 1.3rem;
-            border-bottom: 1px solid var(--card-border);
-            padding-bottom: 15px;
-            margin-bottom: 25px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: var(--white);
-        }
-
-        /* Stili del Form per il Tema Scuro */
-        label {
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: var(--muted);
-            display: block;
-            margin-bottom: 8px;
-            margin-top: 1.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        input[type="text"], textarea, input[type="file"] {
-            width: 100%;
-            padding: 12px 15px;
-            background: rgba(0,0,0,0.2);
-            border: 1px solid var(--card-border);
-            color: var(--text);
-            border-radius: 8px;
-            font-family: 'Inter', sans-serif;
-            box-sizing: border-box;
-            transition: all 0.3s ease;
-        }
+        label { font-weight: 600; font-size: 0.85rem; color: var(--muted); display: block; margin-bottom: 8px; margin-top: 1.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        input[type="text"], textarea, input[type="file"] { width: 100%; padding: 12px 15px; background: rgba(0,0,0,0.2); border: 1px solid var(--card-border); color: var(--text); border-radius: 8px; font-family: 'Inter', sans-serif; box-sizing: border-box; transition: all 0.3s ease; }
         input::placeholder, textarea::placeholder { color: #555; }
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-            background: rgba(0,0,0,0.4);
-            box-shadow: 0 0 0 3px rgba(255,95,135,0.1);
-        }
+        input:focus, textarea:focus { outline: none; border-color: var(--accent); background: rgba(0,0,0,0.4); box-shadow: 0 0 0 3px rgba(255,95,135,0.1); }
 
-        /* Container per affiancare input (Studio e Servizi) */
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
-        .services-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 
-        .service-edit-card {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid var(--card-border);
-            padding: 20px;
-            border-radius: 12px;
-        }
-        .service-edit-card h3 { margin-top: 0; color: var(--accent); font-size: 1rem; margin-bottom: 10px; }
-
-        /* Bottoni */
-        button.btn-submit {
-            background: linear-gradient(135deg, var(--accent), var(--accent-2));
-            color: white;
-            border: none;
-            padding: 14px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 700;
-            width: 100%;
-            margin-top: 2rem;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 5px 15px rgba(255,95,135,0.2);
-        }
+        button.btn-submit { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: white; border: none; padding: 14px 24px; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 700; width: 100%; margin-top: 2rem; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 5px 15px rgba(255,95,135,0.2); }
         button.btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255,95,135,0.3); }
-
         .btn-secondary { background: transparent; border: 1px solid var(--accent); color: var(--accent); box-shadow: none; }
         .btn-secondary:hover { background: rgba(255,95,135,0.1); box-shadow: none; }
 
-        /* Stili della Lista Progetti */
         .project-list { list-style: none; padding: 0; margin: 0; }
-        .project-item {
-            display: flex; align-items: center; background: rgba(0,0,0,0.2);
-            padding: 18px; margin-bottom: 12px; border: 1px solid var(--card-border);
-            border-radius: 12px; transition: all 0.2s ease;
-        }
+        .project-item { display: flex; align-items: center; background: rgba(0,0,0,0.2); padding: 18px; margin-bottom: 12px; border: 1px solid var(--card-border); border-radius: 12px; transition: all 0.2s ease; }
         .project-item:hover { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.15); }
-        .project-item.dragging { opacity: 0.5; border: 2px dashed var(--accent); }
         .drag-handle { cursor: grab; margin-right: 15px; color: #555; font-size: 1.2rem; }
         .project-info { flex-grow: 1; }
         .project-title { font-weight: 600; color: var(--white); display: block; font-size: 1.1rem;}
         .project-desc { font-size: 0.85rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px; display: block; margin-top: 4px;}
 
         .project-actions { display: flex; gap: 8px; }
-        .btn-action {
-            background: rgba(255,255,255,0.05); border: 1px solid var(--card-border);
-            padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; color: var(--text);
-        }
+        .btn-action { background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; color: var(--text); }
         .btn-action:hover { background: rgba(255,255,255,0.1); }
-        .btn-star.active { background: rgba(255,215,0,0.1); border-color: rgba(255,215,0,0.3); color: #ffd700; }
         .btn-delete { color: var(--danger); }
         .btn-delete:hover { background: rgba(255,71,87,0.1); border-color: rgba(255,71,87,0.3); }
 
@@ -174,10 +54,7 @@
         .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.3s; border-bottom: 1px solid transparent; padding-bottom: 2px;}
         .nav-links a:hover { color: var(--white); border-color: var(--white);}
 
-        @media (max-width: 900px) {
-            .dashboard-wrapper { grid-template-columns: 1fr; }
-            .form-row, .services-grid { grid-template-columns: 1fr; gap: 15px;}
-        }
+        @media (max-width: 900px) { .dashboard-wrapper { grid-template-columns: 1fr; } .form-row { grid-template-columns: 1fr; gap: 15px;} }
     </style>
 </head>
 <body>
@@ -197,101 +74,67 @@
             <div class="form-row">
                 <div>
                     <label>Titolo Presentazione</label>
-                    <input type="text" name="about_title" placeholder="Es. Costruiamo Identità Memorabili..." value="<%= typeof about !== 'undefined' ? about.title : '' %>">
-
+                    <input type="text" name="about_title" placeholder="Es. Costruiamo Identità Memorabili..." value="<%= typeof about !== 'undefined' && about.title ? about.title : '' %>">
                     <label>Immagine Studio</label>
                     <input type="file" name="about_image" accept="image/*">
                     <small style="color: var(--muted); display: block; margin-top: 5px;">Lascia vuoto per mantenere l'immagine attuale.</small>
                 </div>
                 <div>
                     <label>Testo Descrittivo</label>
-                    <textarea name="about_description" rows="5" placeholder="Racconta la filosofia del tuo studio..."><%= typeof about !== 'undefined' ? about.description : '' %></textarea>
+                    <textarea name="about_description" rows="5" placeholder="Racconta la filosofia del tuo studio..."><%= typeof about !== 'undefined' && about.description ? about.description : '' %></textarea>
                 </div>
             </div>
             <button type="submit" class="btn-submit btn-secondary" style="width: auto; padding: 12px 40px;">Salva Modifiche Studio</button>
         </form>
     </div>
 
-    <div class="dashboard-box full-width">
-        <h2><span>🛠️</span> Gestione Servizi Offerti</h2>
-        <form action="/update-services" method="POST">
-            <div class="services-grid">
+    <div class="dashboard-box">
+        <h2><span>✨</span> Nuovo Servizio</h2>
+        <form action="/add-service" method="POST">
+            <label>Nome Servizio</label>
+            <input type="text" name="title" placeholder="Es. Produzione Video" required>
 
-                <div class="service-edit-card">
-                    <h3>Servizio 01</h3>
-                    <div style="display: flex; gap: 10px;">
-                        <div style="flex-grow: 1;">
-                            <label style="margin-top: 0;">Nome Servizio</label>
-                            <input type="text" name="s1_title" placeholder="Es. Produzione Video">
-                        </div>
-                        <div style="width: 70px;">
-                            <label style="margin-top: 0;">Icona</label>
-                            <input type="text" name="s1_icon" placeholder="🎬" style="text-align: center;">
-                        </div>
-                    </div>
-                    <label>Descrizione</label>
-                    <textarea name="s1_desc" rows="3" placeholder="Descrizione del servizio..."></textarea>
-                    <label>Tags (separati da virgola)</label>
-                    <input type="text" name="s1_tags" placeholder="Es. Spot TV, Brand Film, Documentari">
-                </div>
+            <label>Icona (Usa Emoji)</label>
+            <input type="text" name="icon" placeholder="🎬" required>
 
-                <div class="service-edit-card">
-                    <h3>Servizio 02</h3>
-                    <div style="display: flex; gap: 10px;">
-                        <div style="flex-grow: 1;">
-                            <label style="margin-top: 0;">Nome Servizio</label>
-                            <input type="text" name="s2_title" placeholder="Es. Siti Web">
-                        </div>
-                        <div style="width: 70px;">
-                            <label style="margin-top: 0;">Icona</label>
-                            <input type="text" name="s2_icon" placeholder="🌐" style="text-align: center;">
-                        </div>
-                    </div>
-                    <label>Descrizione</label>
-                    <textarea name="s2_desc" rows="3" placeholder="Descrizione del servizio..."></textarea>
-                    <label>Tags (separati da virgola)</label>
-                    <input type="text" name="s2_tags" placeholder="Es. Landing Page, E-commerce">
-                </div>
+            <label>Tags (separati da virgola)</label>
+            <input type="text" name="tags" placeholder="Es. Spot TV, Brand Film">
 
-                <div class="service-edit-card">
-                    <h3>Servizio 03</h3>
-                    <div style="display: flex; gap: 10px;">
-                        <div style="flex-grow: 1;">
-                            <label style="margin-top: 0;">Nome Servizio</label>
-                            <input type="text" name="s3_title" placeholder="Es. Motion Design">
-                        </div>
-                        <div style="width: 70px;">
-                            <label style="margin-top: 0;">Icona</label>
-                            <input type="text" name="s3_icon" placeholder="🎨" style="text-align: center;">
-                        </div>
-                    </div>
-                    <label>Descrizione</label>
-                    <textarea name="s3_desc" rows="3" placeholder="Descrizione del servizio..."></textarea>
-                    <label>Tags (separati da virgola)</label>
-                    <input type="text" name="s3_tags" placeholder="Es. Animazioni 2D/3D, VFX">
-                </div>
+            <label>Descrizione</label>
+            <textarea name="description" rows="3" placeholder="Descrivi il servizio offerto..." required></textarea>
 
-                <div class="service-edit-card">
-                    <h3>Servizio 04</h3>
-                    <div style="display: flex; gap: 10px;">
-                        <div style="flex-grow: 1;">
-                            <label style="margin-top: 0;">Nome Servizio</label>
-                            <input type="text" name="s4_title" placeholder="Es. Post-Produzione">
-                        </div>
-                        <div style="width: 70px;">
-                            <label style="margin-top: 0;">Icona</label>
-                            <input type="text" name="s4_icon" placeholder="🎞️" style="text-align: center;">
-                        </div>
-                    </div>
-                    <label>Descrizione</label>
-                    <textarea name="s4_desc" rows="3" placeholder="Descrizione del servizio..."></textarea>
-                    <label>Tags (separati da virgola)</label>
-                    <input type="text" name="s4_tags" placeholder="Es. Montaggio, Color Grading">
-                </div>
-
-            </div>
-            <button type="submit" class="btn-submit btn-secondary" style="width: auto; padding: 12px 40px;">Salva Modifiche Servizi</button>
+            <button type="submit" class="btn-submit">Aggiungi Servizio</button>
         </form>
+    </div>
+
+    <div class="dashboard-box">
+        <h2><span>🛠️</span> I Tuoi Servizi</h2>
+        <ul class="project-list" id="servicesList">
+            <% if (typeof services !== 'undefined' && services.length > 0) { %>
+                <% services.forEach(function(service) { %>
+                    <li class="project-item">
+                        <span class="drag-handle">☰</span>
+                        <div class="project-info" style="display: flex; gap: 15px; align-items: center;">
+                            <span style="font-size: 1.5rem;"><%= service.icon %></span>
+                            <div>
+                                <span class="project-title"><%= service.title %></span>
+                                <span class="project-desc"><%= service.description %></span>
+                            </div>
+                        </div>
+                        <div class="project-actions">
+                            <form action="/delete-service/<%= service.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Sei sicuro di voler eliminare questo servizio?');">
+                                <button type="submit" class="btn-action btn-delete" title="Elimina">🗑️</button>
+                            </form>
+                        </div>
+                    </li>
+                <% }); %>
+            <% } else { %>
+                <div style="text-align: center; padding: 2rem 0;">
+                    <span style="font-size: 2rem; opacity: 0.5;">📭</span>
+                    <p style="color: var(--muted); margin-top: 10px;">Nessun servizio inserito.</p>
+                </div>
+            <% } %>
+        </ul>
     </div>
 
     <div class="dashboard-box">
@@ -299,13 +142,10 @@
         <form action="/add-project" method="POST" enctype="multipart/form-data">
             <label>Titolo del progetto</label>
             <input type="text" name="title" placeholder="Es. Shooting Moda..." required>
-
             <label>Descrizione</label>
             <textarea name="description" rows="4" placeholder="Descrivi il lavoro svolto..." required></textarea>
-
             <label>Immagine Cover</label>
             <input type="file" name="image" accept="image/*" required>
-
             <button type="submit" class="btn-submit">Pubblica Progetto</button>
         </form>
     </div>
@@ -315,16 +155,14 @@
         <ul class="project-list" id="projectList">
             <% if (typeof projects !== 'undefined' && projects.length > 0) { %>
                 <% projects.forEach(function(project) { %>
-                    <li class="project-item" draggable="true" data-id="<%= project.id %>">
+                    <li class="project-item">
                         <span class="drag-handle">☰</span>
                         <div class="project-info">
                             <span class="project-title"><%= project.title %></span>
                             <span class="project-desc"><%= project.description %></span>
                         </div>
                         <div class="project-actions">
-                            <button class="btn-action btn-star <%= project.featured ? 'active' : '' %>" onclick="toggleStar(this)" title="Metti in evidenza">⭐</button>
-                            <button class="btn-action" title="Modifica (Prossimamente)" style="opacity: 0.5; cursor: not-allowed;">✏️</button>
-                            <form action="/delete-project/<%= project.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Sei sicuro di voler eliminare definitivamente questo progetto?');">
+                            <form action="/delete-project/<%= project.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Eliminare definitivamente questo progetto?');">
                                 <button type="submit" class="btn-action btn-delete" title="Elimina">🗑️</button>
                             </form>
                         </div>
@@ -333,7 +171,7 @@
             <% } else { %>
                 <div style="text-align: center; padding: 2rem 0;">
                     <span style="font-size: 2rem; opacity: 0.5;">📁</span>
-                    <p style="color: var(--muted); margin-top: 10px;">Nessun progetto caricato.<br>Usa il modulo qui a fianco per iniziare.</p>
+                    <p style="color: var(--muted); margin-top: 10px;">Nessun progetto caricato.</p>
                 </div>
             <% } %>
         </ul>
@@ -344,48 +182,6 @@
 <div class="nav-links">
     <a href="/">← Torna al sito web pubblico</a>
 </div>
-
-<script>
-    // Funzione visiva per il tasto Stella
-    function toggleStar(button) {
-        button.classList.toggle('active');
-        // Qui andrà la logica per salvare l'evidenza nel DB
-    }
-
-    // Drag & Drop per riordinare
-    const list = document.getElementById('projectList');
-    let draggedItem = null;
-
-    list.addEventListener('dragstart', (e) => {
-        draggedItem = e.target.closest('.project-item');
-        if (draggedItem) setTimeout(() => draggedItem.classList.add('dragging'), 0);
-    });
-
-    list.addEventListener('dragend', () => {
-        if (draggedItem) draggedItem.classList.remove('dragging');
-        draggedItem = null;
-    });
-
-    list.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        const afterElement = getDragAfterElement(list, e.clientY);
-        const dragging = document.querySelector('.dragging');
-        if (dragging) {
-            if (afterElement == null) list.appendChild(dragging);
-            else list.insertBefore(dragging, afterElement);
-        }
-    });
-
-    function getDragAfterElement(container, y) {
-        const draggableElements = [...container.querySelectorAll('.project-item:not(.dragging)')];
-        return draggableElements.reduce((closest, child) => {
-            const box = child.getBoundingClientRect();
-            const offset = y - box.top - box.height / 2;
-            if (offset < 0 && offset > closest.offset) return { offset: offset, element: child };
-            else return closest;
-        }, { offset: Number.NEGATIVE_INFINITY }).element;
-    }
-</script>
 
 </body>
 </html>

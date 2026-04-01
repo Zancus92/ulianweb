@@ -22,8 +22,14 @@
             max-width: 1000px;
             margin: auto;
             display: grid;
-            grid-template-columns: 1fr 1.5fr; /* Divide lo spazio tra modulo e lista */
+            grid-template-columns: 1fr 1.5fr;
             gap: 2rem;
+        }
+
+        /* 🔴 NUOVO: Stile per la sezione a tutta larghezza */
+        .full-width {
+            grid-column: 1 / -1;
+            margin-bottom: 1rem;
         }
 
         .dashboard-box {
@@ -38,6 +44,9 @@
             font-size: 1.2rem;
             border-bottom: 2px solid #f0f0f0;
             padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         /* Stili del Form */
@@ -62,6 +71,14 @@
             outline: none;
             border-color: #111;
         }
+
+        /* Container per affiancare input nella sezione Studio */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
         button.btn-submit {
             background: #111;
             color: white;
@@ -77,96 +94,39 @@
         }
         button.btn-submit:hover { background: #333; }
 
-        /* Stili della Lista Progetti */
-        .project-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .project-item {
-            display: flex;
-            align-items: center;
-            background: #fafafa;
-            padding: 15px;
-            margin-bottom: 10px;
-            border: 1px solid #eee;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-        }
-        .project-item:hover {
+        .btn-secondary {
             background: #fff;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        }
-        .project-item.dragging {
-            opacity: 0.5;
-            border: 2px dashed #111;
-        }
-
-        .drag-handle {
-            cursor: grab;
-            margin-right: 15px;
-            color: #aaa;
-            font-size: 1.2rem;
-        }
-        .drag-handle:active { cursor: grabbing; }
-
-        .project-info {
-            flex-grow: 1;
-        }
-        .project-title {
-            font-weight: 600;
             color: #111;
-            display: block;
+            border: 1px solid #111;
         }
-        .project-desc {
-            font-size: 0.8rem;
-            color: #777;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 200px;
-            display: block;
-        }
+        .btn-secondary:hover { background: #f4f4f4; }
 
-        /* Stili Pulsanti Azione */
-        .project-actions {
-            display: flex;
-            gap: 5px;
+        /* Stili della Lista Progetti */
+        .project-list { list-style: none; padding: 0; margin: 0; }
+        .project-item {
+            display: flex; align-items: center; background: #fafafa;
+            padding: 15px; margin-bottom: 10px; border: 1px solid #eee;
+            border-radius: 8px; transition: all 0.2s ease;
         }
-        .btn-action {
-            background: white;
-            border: 1px solid #ddd;
-            padding: 6px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-        }
-        .btn-action:hover { background: #f0f0f0; }
+        .project-item:hover { background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .project-item.dragging { opacity: 0.5; border: 2px dashed #111; }
+        .drag-handle { cursor: grab; margin-right: 15px; color: #aaa; font-size: 1.2rem; }
+        .project-info { flex-grow: 1; }
+        .project-title { font-weight: 600; color: #111; display: block; }
+        .project-desc { font-size: 0.8rem; color: #777; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; display: block; }
 
-        .btn-star.active {
-            background: #fff9e6;
-            border-color: #ffd700;
-            color: #d4af37;
-        }
-        .btn-delete {
-            color: #e74c3c;
-        }
-        .btn-delete:hover {
-            background: #fdecea;
-            border-color: #e74c3c;
-        }
+        .project-actions { display: flex; gap: 5px; }
+        .btn-action { background: white; border: 1px solid #ddd; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+        .btn-star.active { background: #fff9e6; border-color: #ffd700; color: #d4af37; }
+        .btn-delete { color: #e74c3c; }
+        .btn-delete:hover { background: #fdecea; border-color: #e74c3c; }
 
-        .nav-links {
-            text-align: center;
-            margin-top: 2rem;
-        }
+        .nav-links { text-align: center; margin-top: 2rem; }
         .nav-links a { color: #666; text-decoration: none; font-size: 0.9rem; transition: color 0.3s; }
-        .nav-links a:hover { color: #111; }
 
-        /* Responsive: impila le colonne su schermi piccoli */
         @media (max-width: 768px) {
             .dashboard-wrapper { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -174,56 +134,71 @@
 
 <div class="header-dashboard">
     <h1>Pannello di Controllo ULiAN</h1>
-    <p>Gestisci il tuo portfolio in modo semplice e veloce</p>
+    <p>Gestisci l'identità del tuo studio e il tuo portfolio</p>
 </div>
 
 <div class="dashboard-wrapper">
 
-    <div class="dashboard-box">
-        <h2>Aggiungi Nuovo Progetto</h2>
-        <form action="/add-project" method="POST" enctype="multipart/form-data">
-            <label>Titolo del progetto</label>
-            <input type="text" name="title" placeholder="Es. Shooting Moda..." required>
+    <div class="dashboard-box full-width">
+        <h2><span>🏢</span> Gestione Sezione Studio (Chi Siamo)</h2>
+        <form action="/update-about" method="POST" enctype="multipart/form-data">
+            <div class="form-row">
+                <div>
+                    <label>Titolo Presentazione</label>
+                    <input type="text" name="about_title" placeholder="Es. Oltre lo scatto..." value="<%= typeof about !== 'undefined' ? about.title : '' %>">
 
-            <label>Descrizione del lavoro svolto</label>
-            <textarea name="description" rows="4" placeholder="Descrivi i servizi offerti..." required></textarea>
-
-            <label>Immagine del progetto</label>
-            <input type="file" name="image" accept="image/*" required>
-
-            <button type="submit" class="btn-submit">Pubblica Progetto</button>
+                    <label>Immagine Studio (Cambia foto)</label>
+                    <input type="file" name="about_image" accept="image/*">
+                    <small style="color: #888;">Lascia vuoto per mantenere l'immagine attuale.</small>
+                </div>
+                <div>
+                    <label>Testo Descrittivo</label>
+                    <textarea name="about_description" rows="5" placeholder="Racconta la filosofia del tuo studio..."><%= typeof about !== 'undefined' ? about.description : '' %></textarea>
+                </div>
+            </div>
+            <button type="submit" class="btn-submit btn-secondary" style="width: auto; padding: 10px 40px; margin-top: 1rem;">Salva Modifiche Studio</button>
         </form>
     </div>
 
     <div class="dashboard-box">
-        <h2>I Tuoi Lavori</h2>
-        <ul class="project-list" id="projectList">
+        <h2><span>✨</span> Nuovo Progetto</h2>
+        <form action="/add-project" method="POST" enctype="multipart/form-data">
+            <label>Titolo del progetto</label>
+            <input type="text" name="title" placeholder="Es. Shooting Moda..." required>
 
+            <label>Descrizione</label>
+            <textarea name="description" rows="4" placeholder="Descrivi il lavoro..." required></textarea>
+
+            <label>Immagine Cover</label>
+            <input type="file" name="image" accept="image/*" required>
+
+            <button type="submit" class="btn-submit">Pubblica nel Portfolio</button>
+        </form>
+    </div>
+
+    <div class="dashboard-box">
+        <h2><span>🖼️</span> I Tuoi Lavori</h2>
+        <ul class="project-list" id="projectList">
             <% if (typeof projects !== 'undefined' && projects.length > 0) { %>
                 <% projects.forEach(function(project) { %>
                     <li class="project-item" draggable="true" data-id="<%= project.id %>">
-                        <span class="drag-handle" title="Trascina per riordinare">☰</span>
-
+                        <span class="drag-handle">☰</span>
                         <div class="project-info">
                             <span class="project-title"><%= project.title %></span>
                             <span class="project-desc"><%= project.description %></span>
                         </div>
-
                         <div class="project-actions">
-                            <button class="btn-action btn-star <%= project.featured ? 'active' : '' %>" onclick="toggleStar(this)" title="Metti in evidenza">⭐</button>
-                            <button class="btn-action" title="Modifica">✏️</button>
-
-                            <form action="/delete-project/<%= project.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Sei sicuro di voler eliminare questo progetto? Questa azione è irreversibile.');">
-                                <button type="submit" class="btn-action btn-delete" title="Elimina">🗑️</button>
+                            <button class="btn-action btn-star <%= project.featured ? 'active' : '' %>" onclick="toggleStar(this)">⭐</button>
+                            <button class="btn-action">✏️</button>
+                            <form action="/delete-project/<%= project.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Eliminare definitivamente?');">
+                                <button type="submit" class="btn-action btn-delete">🗑️</button>
                             </form>
-
                         </div>
                     </li>
                 <% }); %>
             <% } else { %>
-                <p style="color: #888; text-align: center; margin-top: 2rem;">Nessun progetto caricato. Inizia aggiungendone uno!</p>
+                <p style="color: #888; text-align: center; padding: 1rem;">Nessun progetto presente.</p>
             <% } %>
-
         </ul>
     </div>
 
@@ -234,15 +209,12 @@
 </div>
 
 <script>
-    // Funzione per il tasto "Stella" (In evidenza)
+    // Script precedenti mantenuti per drag & drop e stelle
     function toggleStar(button) {
-        // Logica visiva: aggiunge o toglie il colore giallo
         button.classList.toggle('active');
-        // NOTA: Qui in futuro andrà inserita la chiamata fetch() al server per salvare la modifica
-        console.log("Stato 'In Evidenza' cambiato!");
+        console.log("Stato cambiato");
     }
 
-    // Logica per il Drag & Drop (Riordinamento)
     const list = document.getElementById('projectList');
     let draggedItem = null;
 
@@ -251,10 +223,9 @@
         if (draggedItem) setTimeout(() => draggedItem.classList.add('dragging'), 0);
     });
 
-    list.addEventListener('dragend', (e) => {
+    list.addEventListener('dragend', () => {
         if (draggedItem) draggedItem.classList.remove('dragging');
         draggedItem = null;
-        // NOTA: Qui in futuro andrà inviato al server il nuovo ordine dei progetti
     });
 
     list.addEventListener('dragover', (e) => {
@@ -262,11 +233,8 @@
         const afterElement = getDragAfterElement(list, e.clientY);
         const dragging = document.querySelector('.dragging');
         if (dragging) {
-            if (afterElement == null) {
-                list.appendChild(dragging);
-            } else {
-                list.insertBefore(dragging, afterElement);
-            }
+            if (afterElement == null) list.appendChild(dragging);
+            else list.insertBefore(dragging, afterElement);
         }
     });
 
@@ -275,11 +243,8 @@
         return draggableElements.reduce((closest, child) => {
             const box = child.getBoundingClientRect();
             const offset = y - box.top - box.height / 2;
-            if (offset < 0 && offset > closest.offset) {
-                return { offset: offset, element: child };
-            } else {
-                return closest;
-            }
+            if (offset < 0 && offset > closest.offset) return { offset: offset, element: child };
+            else return closest;
         }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
 </script>

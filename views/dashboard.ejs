@@ -93,23 +93,19 @@
         <form action="/add-service" method="POST">
             <label>Nome Servizio</label>
             <input type="text" name="title" placeholder="Es. Produzione Video" required>
-
             <label>Icona (Usa Emoji)</label>
             <input type="text" name="icon" placeholder="🎬" required>
-
             <label>Tags (separati da virgola)</label>
             <input type="text" name="tags" placeholder="Es. Spot TV, Brand Film">
-
             <label>Descrizione</label>
             <textarea name="description" rows="3" placeholder="Descrivi il servizio offerto..." required></textarea>
-
             <button type="submit" class="btn-submit">Aggiungi Servizio</button>
         </form>
     </div>
 
     <div class="dashboard-box">
         <h2><span>🛠️</span> I Tuoi Servizi</h2>
-        <ul class="project-list" id="servicesList">
+        <ul class="project-list">
             <% if (typeof services !== 'undefined' && services.length > 0) { %>
                 <% services.forEach(function(service) { %>
                     <li class="project-item">
@@ -144,25 +140,30 @@
             <input type="text" name="title" placeholder="Es. Shooting Moda..." required>
             <label>Descrizione</label>
             <textarea name="description" rows="4" placeholder="Descrivi il lavoro svolto..." required></textarea>
-            <label>Immagine Cover</label>
-            <input type="file" name="image" accept="image/*" required>
-            <button type="submit" class="btn-submit">Pubblica Progetto</button>
+
+            <label>Immagini (Seleziona più foto contemporaneamente)</label>
+            <input type="file" name="images" accept="image/*" multiple required>
+            <small style="color: var(--accent); display: block; margin-top: 5px;">Puoi selezionare fino a 10 immagini. La prima sarà la copertina.</small>
+
+            <button type="submit" class="btn-submit">Pubblica Galleria</button>
         </form>
     </div>
 
     <div class="dashboard-box">
         <h2><span>🖼️</span> I Tuoi Lavori</h2>
-        <ul class="project-list" id="projectList">
+        <ul class="project-list">
             <% if (typeof projects !== 'undefined' && projects.length > 0) { %>
                 <% projects.forEach(function(project) { %>
                     <li class="project-item">
                         <span class="drag-handle">☰</span>
                         <div class="project-info">
                             <span class="project-title"><%= project.title %></span>
-                            <span class="project-desc"><%= project.description %></span>
+                            <span class="project-desc">
+                                📷 <%= project.images.length %> Foto inserite
+                            </span>
                         </div>
                         <div class="project-actions">
-                            <form action="/delete-project/<%= project.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Eliminare definitivamente questo progetto?');">
+                            <form action="/delete-project/<%= project.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Eliminare definitivamente questo progetto e la sua galleria?');">
                                 <button type="submit" class="btn-action btn-delete" title="Elimina">🗑️</button>
                             </form>
                         </div>

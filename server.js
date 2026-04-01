@@ -34,11 +34,6 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-const db = createClient({
-    url: process.env.TURSO_DATABASE_URL,
-    authToken: process.env.TURSO_AUTH_TOKEN,
-});
-
 const uploadToCloudinary = (fileBuffer, folder) => {
     return new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream({ folder: folder }, (error, result) => {
@@ -54,8 +49,6 @@ async function inizializzaDatabase() {
         await db.execute(`CREATE TABLE IF NOT EXISTS projects (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, description TEXT, image_url TEXT, featured INTEGER DEFAULT 0)`);
         await db.execute(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT)`);
         await db.execute(`CREATE TABLE IF NOT EXISTS about (id INTEGER PRIMARY KEY, title TEXT, description TEXT, image_url TEXT)`);
-
-        // Tabella Servizi Dinamica
         await db.execute(`CREATE TABLE IF NOT EXISTS services (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, icon TEXT, description TEXT, tags TEXT)`);
 
         const aboutCheck = await db.execute(`SELECT * FROM about WHERE id = 1`);
@@ -80,6 +73,23 @@ async function inizializzaDatabase() {
 
 inizializzaDatabase();
 
+// --- FUNZIONE PER NORMALIZZARE LE IMMAGINI ---
+// Trasforma i dati vecchi e nuovi in un Array garantito per il frontend
+function parseProjects(rows) {
+    return rows.map(p => {
+        let imagesArray = [];
+        try {
+            // Prova a leggere come JSON (Nuovi progetti con più foto)
+            imagesArray = JSON.parse(p.image_url);
+            if (!Array.isArray(imagesArray)) imagesArray = [p.image_url];
+        } catch (e) {
+            // Se fallisce, era una vecchia stringa singola
+            imagesArray = [p.image_url];
+        }
+        return { ...p, images: imagesArray };
+    });
+}
+
 // --- ROTTE ---
 
 app.get('/', async (req, res) => {
@@ -87,7 +97,10 @@ app.get('/', async (req, res) => {
         const projectsResult = await db.execute("SELECT * FROM projects ORDER BY id DESC");
         const aboutResult = await db.execute("SELECT * FROM about WHERE id = 1");
         const servicesResult = await db.execute("SELECT * FROM services ORDER BY id ASC");
-        res.render('index', { projects: projectsResult.rows, about: aboutResult.rows[0], services: servicesResult.rows });
+
+        const projectsWithImages = parseProjects(projectsResult.rows);
+
+        res.render('index', { projects: projectsWithImages, about: aboutResult.rows[0], services: servicesResult.rows });
     } catch (err) { res.status(500).send("Errore server."); }
 });
 
@@ -110,7 +123,10 @@ app.get('/dashboard', async (req, res) => {
         const projectsResult = await db.execute("SELECT * FROM projects ORDER BY id DESC");
         const aboutResult = await db.execute("SELECT * FROM about WHERE id = 1");
         const servicesResult = await db.execute("SELECT * FROM services ORDER BY id ASC");
-        res.render('dashboard', { projects: projectsResult.rows, about: aboutResult.rows[0], services: servicesResult.rows });
+
+        const projectsWithImages = parseProjects(projectsResult.rows);
+
+        res.render('dashboard', { projects: projectsWithImages, about: aboutResult.rows[0], services: servicesResult.rows });
     } catch (err) { res.status(500).send("Errore dashboard."); }
 });
 
@@ -127,7 +143,6 @@ app.post('/update-about', upload.single('about_image'), async (req, res) => {
     } catch (err) { res.status(500).send("Errore aggiornamento."); }
 });
 
-// NUOVO: Rotte per i Servizi Dinamici
 app.post('/add-service', async (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect('/login');
     try {
@@ -144,13 +159,21 @@ app.post('/delete-service/:id', async (req, res) => {
     } catch (err) { res.status(500).send("Errore eliminazione."); }
 });
 
-// Rotte per Progetti
-app.post('/add-project', upload.single('image'), async (req, res) => {
+// 🔴 MODIFICATO: Rotta Progetti Multi-Immagine
+// Accetta fino a 10 immagini tramite l'input "images"
+app.post('/add-project', upload.array('images', 10), async (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect('/login');
     try {
-        if (!req.file) return res.status(400).send("Immagine obbligatoria!");
-        const finalImageUrl = await uploadToCloudinary(req.file.buffer, "portfolio");
-        await db.execute(`INSERT INTO projects (title, description, image_url, featured) VALUES (?, ?, ?, 0)`, [req.body.title, req.body.description, finalImageUrl]);
+        if (!req.files || req.files.length === 0) return res.status(400).send("Almeno un'immagine obbligatoria!");
+
+        // Carica tutte le immagini su Cloudinary in parallelo
+        const uploadPromises = req.files.map(file => uploadToCloudinary(file.buffer, "portfolio"));
+        const finalImageUrls = await Promise.all(uploadPromises);
+
+        // Salva l'array di URL come stringa JSON nel database
+        const imagesJsonString = JSON.stringify(finalImageUrls);
+
+        await db.execute(`INSERT INTO projects (title, description, image_url, featured) VALUES (?, ?, ?, 0)`, [req.body.title, req.body.description, imagesJsonString]);
         res.redirect('/dashboard');
     } catch (err) { res.status(500).send("Errore aggiunta progetto."); }
 });

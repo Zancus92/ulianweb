@@ -33,6 +33,8 @@
 
         button.btn-submit { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: white; border: none; padding: 14px 24px; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 700; width: 100%; margin-top: 2rem; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 5px 15px rgba(255,95,135,0.2); }
         button.btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255,95,135,0.3); }
+        button.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
         .btn-secondary { background: transparent; border: 1px solid var(--accent); color: var(--accent); box-shadow: none; }
         .btn-secondary:hover { background: rgba(255,95,135,0.1); box-shadow: none; }
 
@@ -135,17 +137,17 @@
 
     <div class="dashboard-box">
         <h2><span>✨</span> Nuovo Progetto Portfolio</h2>
-        <form action="/add-project" method="POST" enctype="multipart/form-data">
+        <form id="newProjectForm" action="/add-project" method="POST">
             <label>Titolo del progetto</label>
             <input type="text" name="title" placeholder="Es. Shooting Moda..." required>
             <label>Descrizione</label>
             <textarea name="description" rows="4" placeholder="Descrivi il lavoro svolto..." required></textarea>
 
             <label>Immagini (Seleziona più foto contemporaneamente)</label>
-            <input type="file" name="images" accept="image/*" multiple required>
-            <small style="color: var(--accent); display: block; margin-top: 5px;">Puoi selezionare fino a 10 immagini. La prima sarà la copertina.</small>
+            <input type="file" id="projectImages" accept="image/*" multiple required>
+            <small style="color: var(--accent); display: block; margin-top: 5px;">Seleziona quante foto vuoi. Verranno caricate direttamente sul cloud.</small>
 
-            <button type="submit" class="btn-submit">Pubblica Galleria</button>
+            <button type="submit" id="submitProjectBtn" class="btn-submit">Pubblica Galleria</button>
         </form>
     </div>
 
@@ -183,6 +185,67 @@
 <div class="nav-links">
     <a href="/">← Torna al sito web pubblico</a>
 </div>
+
+<script>
+    const newProjectForm = document.getElementById('newProjectForm');
+    const projectImages = document.getElementById('projectImages');
+    const submitProjectBtn = document.getElementById('submitProjectBtn');
+
+    // Recuperiamo il nome del tuo Cloudinary dal server
+    const cloudName = "<%= typeof cloudName !== 'undefined' ? cloudName : '' %>";
+
+    if (newProjectForm) {
+        newProjectForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            submitProjectBtn.innerText = 'Caricamento foto in corso... ⏳';
+            submitProjectBtn.disabled = true;
+
+            const files = projectImages.files;
+            const uploadedUrls = [];
+
+            try {
+                // Loop: Carica ogni file direttamente su Cloudinary ignorando Vercel!
+                for (let i = 0; i < files.length; i++) {
+                    const formData = new FormData();
+                    formData.append('file', files[i]);
+                    formData.append('upload_preset', 'portfolio_upload'); // Il preset creato prima
+
+                    const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    if (data.secure_url) {
+                        uploadedUrls.push(data.secure_url);
+                    } else {
+                        throw new Error(data.error.message);
+                    }
+                }
+
+                // Creiamo un campo nascosto con i link ottenuti e li inviamo a Vercel
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'image_urls';
+                hiddenInput.value = JSON.stringify(uploadedUrls);
+                newProjectForm.appendChild(hiddenInput);
+
+                // Cancelliamo l'input dei file così il browser non li spedisce a Vercel
+                projectImages.value = '';
+
+                // Ora Vercel riceve solo testo leggerissimo
+                newProjectForm.submit();
+
+            } catch (error) {
+                console.error(error);
+                alert('Errore caricamento. Hai creato il preset "portfolio_upload" su Cloudinary impostato su Unsigned?');
+                submitProjectBtn.innerText = 'Pubblica Galleria';
+                submitProjectBtn.disabled = false;
+            }
+        });
+    }
+</script>
 
 </body>
 </html>

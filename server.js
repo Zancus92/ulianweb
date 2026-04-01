@@ -34,11 +34,6 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-const db = createClient({
-    url: process.env.TURSO_DATABASE_URL,
-    authToken: process.env.TURSO_AUTH_TOKEN,
-});
-
 const uploadToCloudinary = (fileBuffer, folder) => {
     return new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream({ folder: folder }, (error, result) => {
@@ -49,6 +44,11 @@ const uploadToCloudinary = (fileBuffer, folder) => {
     });
 };
 
+const db = createClient({
+    url: process.env.TURSO_DATABASE_URL,
+    authToken: process.env.TURSO_AUTH_TOKEN,
+});
+
 async function inizializzaDatabase() {
     try {
         await db.execute(`CREATE TABLE IF NOT EXISTS projects (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, description TEXT, image_url TEXT, featured INTEGER DEFAULT 0)`);
@@ -57,9 +57,7 @@ async function inizializzaDatabase() {
         await db.execute(`CREATE TABLE IF NOT EXISTS services (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, icon TEXT, description TEXT, tags TEXT)`);
 
         const aboutCheck = await db.execute(`SELECT * FROM about WHERE id = 1`);
-        if (aboutCheck.rows.length === 0) {
-            await db.execute(`INSERT INTO about (id, title, description, image_url) VALUES (1, 'Titolo Studio', 'Descrizione...', 'https://via.placeholder.com/800x600')`);
-        }
+        if (aboutCheck.rows.length === 0) await db.execute(`INSERT INTO about (id, title, description, image_url) VALUES (1, 'Titolo Studio', 'Descrizione...', 'https://via.placeholder.com/800x600')`);
 
         const servicesCheck = await db.execute(`SELECT * FROM services`);
         if (servicesCheck.rows.length === 0) {
@@ -78,7 +76,6 @@ async function inizializzaDatabase() {
 
 inizializzaDatabase();
 
-// --- FUNZIONE PER NORMALIZZARE LE IMMAGINI (Resa ultra-sicura) ---
 function parseProjects(rows) {
     if (!rows) return [];
     return rows.map(p => {
@@ -87,9 +84,7 @@ function parseProjects(rows) {
             try {
                 imagesArray = JSON.parse(p.image_url);
                 if (!Array.isArray(imagesArray)) imagesArray = [p.image_url];
-            } catch (e) {
-                imagesArray = [p.image_url];
-            }
+            } catch (e) { imagesArray = [p.image_url]; }
         }
         return { ...p, images: imagesArray };
     });
@@ -102,14 +97,9 @@ app.get('/', async (req, res) => {
         const projectsResult = await db.execute("SELECT * FROM projects ORDER BY id DESC");
         const aboutResult = await db.execute("SELECT * FROM about WHERE id = 1");
         const servicesResult = await db.execute("SELECT * FROM services ORDER BY id ASC");
-
         const projectsWithImages = parseProjects(projectsResult.rows);
-
         res.render('index', { projects: projectsWithImages, about: aboutResult.rows[0], services: servicesResult.rows });
-    } catch (err) {
-        // LO SCANNER: Ora se qualcosa si rompe lo scriverà in pagina
-        res.status(500).send(`<h1>Errore sulla Home</h1><p style="color:red;">${err.message}</p><pre style="background:#eee;padding:15px;">${err.stack}</pre>`);
-    }
+    } catch (err) { res.status(500).send(`Errore Home: ${err.message}`); }
 });
 
 app.get('/login', (req, res) => res.render('login'));
@@ -131,14 +121,15 @@ app.get('/dashboard', async (req, res) => {
         const projectsResult = await db.execute("SELECT * FROM projects ORDER BY id DESC");
         const aboutResult = await db.execute("SELECT * FROM about WHERE id = 1");
         const servicesResult = await db.execute("SELECT * FROM services ORDER BY id ASC");
-
         const projectsWithImages = parseProjects(projectsResult.rows);
 
-        res.render('dashboard', { projects: projectsWithImages, about: aboutResult.rows[0], services: servicesResult.rows });
-    } catch (err) {
-        // LO SCANNER ATTIVO ANCHE QUI
-        res.status(500).send(`<h1>Errore sulla Dashboard</h1><p style="color:red;">${err.message}</p><pre style="background:#eee;padding:15px;">${err.stack}</pre>`);
-    }
+        res.render('dashboard', {
+            projects: projectsWithImages,
+            about: aboutResult.rows[0],
+            services: servicesResult.rows,
+            cloudName: process.env.CLOUDINARY_CLOUD_NAME // 🔴 Passiamo il nome a EJS
+        });
+    } catch (err) { res.status(500).send(`Errore Dashboard: ${err.message}`); }
 });
 
 app.post('/update-about', upload.single('about_image'), async (req, res) => {
@@ -170,14 +161,15 @@ app.post('/delete-service/:id', async (req, res) => {
     } catch (err) { res.status(500).send(`Errore eliminazione servizio: ${err.message}`); }
 });
 
-app.post('/add-project', upload.array('images', 10), async (req, res) => {
+// 🔴 MODIFICATA: Questa rotta ora riceve SOLO un campo di testo chiamato image_urls
+app.post('/add-project', upload.none(), async (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect('/login');
     try {
-        if (!req.files || req.files.length === 0) return res.status(400).send("Almeno un'immagine obbligatoria!");
+        const imagesJsonString = req.body.image_urls; // Riceviamo l'array testuale
 
-        const uploadPromises = req.files.map(file => uploadToCloudinary(file.buffer, "portfolio"));
-        const finalImageUrls = await Promise.all(uploadPromises);
-        const imagesJsonString = JSON.stringify(finalImageUrls);
+        if (!imagesJsonString || imagesJsonString === '[]') {
+            return res.status(400).send("Almeno un'immagine obbligatoria!");
+        }
 
         await db.execute(`INSERT INTO projects (title, description, image_url, featured) VALUES (?, ?, ?, 0)`, [req.body.title, req.body.description, imagesJsonString]);
         res.redirect('/dashboard');

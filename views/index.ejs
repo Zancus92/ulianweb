@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>ULiAN | Fotografia & Social Media</title>
     <meta name="description" content="Portfolio di ULiAN, servizi esclusivi di Fotografia & Gestione Social Media." />
 
@@ -37,8 +37,12 @@
             color: var(--text);
             line-height: 1.6;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
         a { color: inherit; text-decoration: none; }
+
+        /* Migliora la reattività al tocco su mobile */
+        button, a, .project, .close-modal { touch-action: manipulation; }
 
         .noise {
             position: fixed; inset: 0; pointer-events: none; opacity: 0.035;
@@ -46,13 +50,13 @@
             background-size: 12px 12px; z-index: 1;
         }
 
+        /* Il cursore di default è nascosto, lo mostriamo via JS solo su PC */
         .cursor-glow {
-            position: fixed; width: 300px; height: 300px; border-radius: 50%;
+            display: none; position: fixed; width: 300px; height: 300px; border-radius: 50%;
             background: radial-gradient(circle, rgba(255,95,135,0.18), transparent 65%);
             pointer-events: none; transform: translate(-50%, -50%); z-index: 0; filter: blur(18px);
         }
 
-        /* 🔴 NUOVO: Barra di Scorrimento in alto */
         #progress-bar {
             position: fixed; top: 0; left: 0; width: 0%; height: 3px;
             background: linear-gradient(90deg, var(--accent), var(--gold));
@@ -65,10 +69,9 @@
         header {
             position: sticky; top: 0; z-index: 30; backdrop-filter: blur(14px);
             background: rgba(10,10,13,0.55); border-bottom: 1px solid rgba(255,255,255,0.06);
-            /* 🔴 NUOVO: Transizione per l'Header Intelligente */
             transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
         }
-        header.hide { transform: translateY(-100%); } /* Classe aggiunta via JS */
+        header.hide { transform: translateY(-100%); }
 
         .nav {
             max-width: var(--max); margin: 0 auto; padding: 16px 20px;
@@ -77,12 +80,10 @@
         .brand { display: flex; align-items: center; gap: 14px; font-weight: 700; }
         .brand-text span { display: block; font-size: 0.8rem; color: var(--muted); font-weight: 500; }
         .nav-links { display: flex; gap: 18px; }
-        .nav-links a { color: var(--muted); font-size: 0.95rem; transition: 0.25s ease; position: relative; }
+        .nav-links a { color: var(--muted); font-size: 0.95rem; transition: 0.25s ease; position: relative; padding: 5px 0; }
         .nav-links a:hover { color: var(--white); }
-
-        /* 🔴 NUOVO: Sottolineatura animata nei link della navbar */
         .nav-links a::after {
-            content: ''; position: absolute; width: 0; height: 2px; bottom: -4px; left: 0;
+            content: ''; position: absolute; width: 0; height: 2px; bottom: 0; left: 0;
             background-color: var(--accent); transition: width 0.3s ease;
         }
         .nav-links a:hover::after { width: 100%; }
@@ -107,20 +108,20 @@
         .btn {
             display: inline-flex; align-items: center; justify-content: center; gap: 10px;
             padding: 14px 22px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.08);
-            font-weight: 700; cursor: pointer;
-            /* La transizione viene gestita da JS per l'effetto magnetico */
+            font-weight: 700; cursor: pointer; transition: transform 0.3s, opacity 0.3s;
         }
         .btn-primary {
             background: linear-gradient(135deg, var(--accent), var(--accent-2)); border: none;
             box-shadow: 0 12px 30px rgba(255,95,135,0.25);
         }
+        .btn:hover { opacity: 0.9; }
 
         /* =========================================
            SEZIONE HERO
            ========================================= */
         .hero { min-height: 80vh; display: flex; align-items: center; position: relative; }
         .hero-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 40px; align-items: center; width: 100%; }
-        h1 { font-size: clamp(2.6rem, 7vw, 5rem); line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 22px; }
+        h1 { font-size: clamp(2.5rem, 8vw, 5rem); line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 22px; }
         .hero p { font-size: 1.08rem; color: var(--muted); max-width: 640px; margin-bottom: 30px; }
         .hero-card {
             position: relative; background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
@@ -128,16 +129,13 @@
             box-shadow: var(--shadow); overflow: hidden; transform-style: preserve-3d;
         }
 
-        /* 🔴 NUOVO: Indicatore di scroll animato (Mouse) */
         .scroll-down {
             position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
             display: flex; flex-direction: column; align-items: center; gap: 8px;
             color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em;
             opacity: 0.7; pointer-events: none;
         }
-        .mouse-icon {
-            width: 22px; height: 34px; border: 2px solid var(--muted); border-radius: 20px; position: relative;
-        }
+        .mouse-icon { width: 22px; height: 34px; border: 2px solid var(--muted); border-radius: 20px; position: relative; }
         .mouse-wheel {
             width: 4px; height: 6px; background: var(--accent); border-radius: 2px;
             position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
@@ -148,11 +146,9 @@
         /* =========================================
            SEZIONE CHI SIAMO (STUDIO)
            ========================================= */
-        .about-grid {
-            display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 60px; align-items: center;
-        }
-        .about-content h2 { font-size: clamp(2rem, 4vw, 3rem); line-height: 1.1; margin-bottom: 24px; }
-        .about-content p { color: var(--muted); font-size: 1.1rem; margin-bottom: 20px; }
+        .about-grid { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 60px; align-items: center; }
+        .about-content h2 { font-size: clamp(2rem, 5vw, 3rem); line-height: 1.1; margin-bottom: 24px; }
+        .about-content p { color: var(--muted); font-size: 1.05rem; margin-bottom: 24px; }
 
         .about-image-wrapper {
             position: relative; border-radius: 30px; padding: 10px;
@@ -173,68 +169,97 @@
            SEZIONE PORTFOLIO
            ========================================= */
         .section-head { margin-bottom: 40px; }
-        .section-head h2 { font-size: clamp(2rem, 4vw, 3.4rem); letter-spacing: -0.04em; }
-        .portfolio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
+        .section-head h2 { font-size: clamp(2rem, 5vw, 3.4rem); letter-spacing: -0.04em; }
+        .portfolio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
 
         .project {
-            position: relative; min-height: 380px; border-radius: 28px; overflow: hidden;
+            position: relative; min-height: 350px; border-radius: 24px; overflow: hidden;
             border: 1px solid rgba(255, 95, 135, 0.25); background-clip: padding-box;
             padding: 24px; display: flex; flex-direction: column; justify-content: end;
             transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
             background-size: cover; background-position: center; cursor: pointer;
         }
-        .project:hover { transform: translateY(-8px); border-color: var(--accent); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        /* Solo su schermi grandi applichiamo l'hover esagerato */
+        @media (hover: hover) and (pointer: fine) {
+            .project:hover { transform: translateY(-8px); border-color: var(--accent); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        }
+
         .project::after {
             content: ""; position: absolute; inset: 0;
             background: linear-gradient(to bottom, rgba(10,10,13,0) 20%, rgba(10,10,13,0.85) 70%, rgba(10,10,13,1) 100%);
             z-index: 0;
         }
         .project > * { position: relative; z-index: 1; }
-        .project h3 { font-size: 1.5rem; margin-bottom: 8px; color: var(--white); text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
-        .project p { color: #d8d8df; font-size: 0.95rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .project h3 { font-size: 1.4rem; margin-bottom: 8px; color: var(--white); text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+        .project p { color: #d8d8df; font-size: 0.9rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 
         /* =========================================
-           MODAL, FOOTER E ALTRO
+           MODAL E FOOTER
            ========================================= */
         .modal {
             display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.9); backdrop-filter: blur(10px);
-            justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease;
+            justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; padding: 15px;
         }
         .modal.show { display: flex; opacity: 1; }
         .modal-content {
             background: var(--bg-soft); border: 1px solid var(--card-border); border-radius: var(--radius);
-            width: 90%; max-width: 900px; max-height: 90vh; overflow-y: auto; position: relative;
+            width: 100%; max-width: 900px; max-height: 90vh; overflow-y: auto; position: relative;
             transform: translateY(30px); transition: transform 0.4s cubic-bezier(0.2, 1, 0.3, 1);
         }
         .modal.show .modal-content { transform: translateY(0); }
         .close-modal {
-            position: absolute; top: 20px; right: 25px; color: var(--muted); font-size: 35px; cursor: pointer;
-            z-index: 10; background: rgba(0,0,0,0.5); width: 45px; height: 45px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+            position: absolute; top: 15px; right: 15px; color: var(--white); font-size: 30px; cursor: pointer;
+            z-index: 10; background: rgba(0,0,0,0.6); width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; transition: all 0.2s; backdrop-filter: blur(5px);
         }
-        .close-modal:hover { color: var(--white); background: var(--accent); transform: scale(1.1); }
-        .modal-image { width: 100%; max-height: 60vh; object-fit: cover; border-bottom: 1px solid var(--card-border); }
-        .modal-body { padding: 40px; }
+        @media (hover: hover) and (pointer: fine) {
+            .close-modal:hover { background: var(--accent); transform: scale(1.1); }
+        }
+        .modal-image { width: 100%; max-height: 50vh; object-fit: cover; border-bottom: 1px solid var(--card-border); }
+        .modal-body { padding: 30px; }
 
         footer { border-top: 1px solid rgba(255,255,255,0.06); background: rgba(10,10,13,0.8); margin-top: 40px; }
-        .footer-inner { max-width: var(--max); margin: 0 auto; padding: 28px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; color: var(--muted); }
+        .footer-inner { max-width: var(--max); margin: 0 auto; padding: 28px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; color: var(--muted); gap: 15px;}
 
         .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.2, 1, 0.3, 1); }
         .reveal.visible { opacity: 1; transform: translateY(0); }
 
+        /* =========================================
+           🔴 REGOLE RESPONSIVE PER SMARTPHONE
+           ========================================= */
         @media (max-width: 800px) {
-            .hero-grid, .about-grid { grid-template-columns: 1fr; gap: 40px; }
-            .about-grid { display: flex; flex-direction: column-reverse; }
-            h1 { font-size: 3rem; }
-            .nav { flex-direction: column; }
-            .scroll-down { display: none; } /* Nascondiamo su mobile per risparmiare spazio */
+            .container { padding: 50px 15px; } /* Riduciamo i margini giganti */
+            .hero { min-height: auto; padding-top: 20px; }
+            .hero-grid, .about-grid { grid-template-columns: 1fr; gap: 35px; }
+            .about-grid { display: flex; flex-direction: column-reverse; } /* Testo sopra, immagine sotto su mobile */
+
+            .nav { flex-direction: column; gap: 12px; padding: 12px 15px; }
+            .nav-links { gap: 15px; justify-content: center; width: 100%; }
+
+            h1 { font-size: 2.4rem; text-align: center; }
+            .hero p { text-align: center; margin: 0 auto 25px auto; font-size: 1rem; }
+            .hero .reveal { display: flex; flex-direction: column; align-items: center; }
+
+            .scroll-down { display: none; } /* Togliamo l'animazione scroll su mobile per pulizia */
+
+            .about-content { text-align: center; }
+            .about-image-wrapper::after { top: 10px; left: -10px; } /* Aggiustiamo l'ombra dell'immagine */
+
+            .section-head { text-align: center; }
+            .section-head p { margin: 0 auto; }
+            .eyebrow { margin: 0 auto 15px auto; }
+
+            .modal-body { padding: 20px; }
+            .modal-title { font-size: 1.8rem; margin-bottom: 10px;}
+            .modal-desc { font-size: 0.95rem; }
+
+            .footer-inner { flex-direction: column; text-align: center; }
         }
     </style>
 </head>
 <body>
 <div id="progress-bar"></div>
-
 <div class="noise"></div>
 <div class="cursor-glow" id="cursorGlow"></div>
 
@@ -284,13 +309,13 @@
         <div class="container">
             <div class="about-grid">
                 <div class="about-image-wrapper reveal">
-                    <img src="<%= typeof about !== 'undefined' ? about.image_url : 'https://via.placeholder.com/600x800' %>" alt="ULiAN Studio">
+                    <img src="<%= typeof about !== 'undefined' ? about.image_url : 'https://images.unsplash.com/photo-1554046920-90dc20696352?q=80&w=800&auto=format&fit=crop' %>" alt="ULiAN Studio">
                 </div>
                 <div class="about-content reveal">
                     <div class="eyebrow">L'Essenza dello Studio</div>
-                    <h2><%= typeof about !== 'undefined' ? about.title : 'Titolo Studio' %></h2>
-                    <p style="white-space: pre-wrap;"><%= typeof about !== 'undefined' ? about.description : 'Descrizione...' %></p>
-                    <a href="#portfolio" class="btn magnetic">Scopri il metodo</a>
+                    <h2>Costruiamo Identità Memorabili</h2>
+                    <p style="white-space: pre-wrap;">Il mio obiettivo non è solo scattare belle foto, ma creare un linguaggio visivo unico che racconti la vera essenza del tuo progetto. Lavoro a stretto contatto con ogni cliente per trasformare le idee in campagne d'impatto.</p>
+                    <a href="#portfolio" class="btn magnetic">Scopri i lavori</a>
                 </div>
             </div>
         </div>
@@ -335,36 +360,23 @@
 
 <footer>
     <div class="footer-inner">
-        <div>© 2026 ULiAN Studio.</div>
+        <div>© 2026 ULiAN Studio. Tutti i diritti riservati.</div>
         <a href="/login" class="admin-link magnetic">⚙️ Accesso Amministratore</a>
     </div>
 </footer>
 
 <script>
-    // 1. ANIMAZIONE DI SCORRIMENTO (Fade Up)
+    // Controllo se il dispositivo ha il touch screen o il mouse
+    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.matchMedia("(pointer: coarse)").matches);
+
+    // 1. ANIMAZIONE DI SCORRIMENTO (Sempre attiva)
     const reveals = document.querySelectorAll('.reveal');
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
     }, { threshold: 0.15 });
     reveals.forEach(el => observer.observe(el));
 
-    // 2. CURSORE LUMINOSO GLOBALE
-    const glow = document.getElementById('cursorGlow');
-    window.addEventListener('mousemove', (e) => {
-        glow.style.left = e.clientX + 'px'; glow.style.top = e.clientY + 'px';
-    });
-
-    // 3. EFFETTO TILT CARD (Hero)
-    const tiltCard = document.getElementById('tiltCard');
-    tiltCard.addEventListener('mousemove', (e) => {
-        const rect = tiltCard.getBoundingClientRect();
-        const x = e.clientX - rect.left; const y = e.clientY - rect.top;
-        const rotateY = ((x / rect.width) - 0.5) * 12; const rotateX = ((y / rect.height) - 0.5) * -12;
-        tiltCard.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-    });
-    tiltCard.addEventListener('mouseleave', () => { tiltCard.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)'; });
-
-    // 4. GESTIONE MODAL
+    // 2. GESTIONE MODAL (Sempre attiva)
     const modal = document.getElementById("projectModal");
     function openModal(title, description, imageUrl) {
         document.getElementById("modalTitle").innerText = title;
@@ -378,11 +390,7 @@
     }
     window.onclick = (e) => { if (e.target == modal) closeModal(); }
 
-    // =========================================
-    // 🔴 NUOVI SCRIPT PER FUNZIONI AVANZATE
-    // =========================================
-
-    // 5. PROGRESS BAR DELLA LETTURA
+    // 3. PROGRESS BAR (Sempre attiva)
     window.addEventListener('scroll', () => {
         const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
         const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
@@ -390,35 +398,61 @@
         document.getElementById("progress-bar").style.width = scrolled + "%";
     });
 
-    // 6. HEADER INTELLIGENTE (Nascondi giù, Mostra su)
+    // 4. HEADER INTELLIGENTE (Sempre attiva)
     let lastScrollTop = 0;
     const header = document.getElementById('main-header');
     window.addEventListener('scroll', () => {
         let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
         if (scrollTop > lastScrollTop && scrollTop > 100) {
-            header.classList.add('hide'); // Scorrendo giù, nascondi
+            header.classList.add('hide');
         } else {
-            header.classList.remove('hide'); // Scorrendo su, mostra
+            header.classList.remove('hide');
         }
         lastScrollTop = scrollTop;
     });
 
-    // 7. BOTTONI MAGNETICI
-    const magnets = document.querySelectorAll('.magnetic');
-    magnets.forEach(btn => {
-        btn.addEventListener('mousemove', (e) => {
-            btn.style.transition = 'none'; // Togliamo la transizione per renderlo fluido al mouse
-            const rect = btn.getBoundingClientRect();
-            // Calcoliamo la distanza dal centro del bottone
-            const x = (e.clientX - rect.left - rect.width / 2) * 0.3;
-            const y = (e.clientY - rect.top - rect.height / 2) * 0.3;
-            btn.style.transform = `translate(${x}px, ${y}px)`;
+    // ====================================================================
+    // 🔴 ATTIVIAMO GLI EFFETTI "MOUSE" SOLO SE SIAMO SU UN PC (NO TOUCH)
+    // ====================================================================
+    if (!isTouchDevice) {
+
+        // Attiva il cursore luminoso personalizzato
+        const glow = document.getElementById('cursorGlow');
+        glow.style.display = 'block';
+        window.addEventListener('mousemove', (e) => {
+            glow.style.left = e.clientX + 'px'; glow.style.top = e.clientY + 'px';
         });
-        btn.addEventListener('mouseleave', () => {
-            btn.style.transition = 'transform 0.4s cubic-bezier(0.2, 1, 0.3, 1)'; // Rimettiamo la transizione elastica
-            btn.style.transform = `translate(0px, 0px)`; // Torna in posizione originale
+
+        // Attiva l'effetto 3D Tilt sulla card principale
+        const tiltCard = document.getElementById('tiltCard');
+        if(tiltCard){
+            tiltCard.addEventListener('mousemove', (e) => {
+                const rect = tiltCard.getBoundingClientRect();
+                const x = e.clientX - rect.left; const y = e.clientY - rect.top;
+                const rotateY = ((x / rect.width) - 0.5) * 12; const rotateX = ((y / rect.height) - 0.5) * -12;
+                tiltCard.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+            tiltCard.addEventListener('mouseleave', () => {
+                tiltCard.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
+            });
+        }
+
+        // Attiva i bottoni magnetici
+        const magnets = document.querySelectorAll('.magnetic');
+        magnets.forEach(btn => {
+            btn.addEventListener('mousemove', (e) => {
+                btn.style.transition = 'none';
+                const rect = btn.getBoundingClientRect();
+                const x = (e.clientX - rect.left - rect.width / 2) * 0.3;
+                const y = (e.clientY - rect.top - rect.height / 2) * 0.3;
+                btn.style.transform = `translate(${x}px, ${y}px)`;
+            });
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transition = 'transform 0.4s cubic-bezier(0.2, 1, 0.3, 1)';
+                btn.style.transform = `translate(0px, 0px)`;
+            });
         });
-    });
+    }
 </script>
 </body>
 </html>

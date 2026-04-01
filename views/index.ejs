@@ -88,7 +88,6 @@
         }
         .nav-links a:hover::after { width: 100%; }
 
-        /* 🔴 NUOVO: Hamburger Menu (nascosto su PC) */
         .hamburger {
             display: none; flex-direction: column; gap: 6px; cursor: pointer; z-index: 60;
             background: transparent; border: none; padding: 10px;
@@ -176,10 +175,102 @@
         }
 
         /* =========================================
-           SEZIONE PORTFOLIO
+           🔴 NUOVA: SEZIONE SERVIZI
            ========================================= */
         .section-head { margin-bottom: 40px; }
         .section-head h2 { font-size: clamp(2rem, 5vw, 3.4rem); letter-spacing: -0.04em; }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .service-card {
+            background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: var(--radius);
+            padding: 35px 30px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            .service-card:hover {
+                transform: translateY(-8px);
+                border-color: rgba(255, 95, 135, 0.4);
+                box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            }
+            .service-card:hover .service-arrow {
+                transform: translate(5px, -5px);
+                color: var(--accent);
+            }
+        }
+
+        .service-num {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 4rem;
+            font-weight: 800;
+            color: rgba(255,255,255,0.04);
+            line-height: 1;
+            pointer-events: none;
+        }
+
+        .service-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .service-name {
+            font-size: 1.5rem;
+            color: var(--white);
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .service-desc {
+            color: var(--muted);
+            font-size: 0.95rem;
+            margin-bottom: 25px;
+            flex-grow: 1; /* Spinge i tag verso il basso per allineare le card */
+        }
+
+        .service-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .service-tags .tag {
+            font-size: 0.75rem;
+            padding: 5px 12px;
+            border-radius: 999px;
+            background: rgba(255,95,135,0.08);
+            color: var(--accent);
+            border: 1px solid rgba(255,95,135,0.2);
+            font-weight: 600;
+        }
+
+        .service-arrow {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            font-size: 1.2rem;
+            color: var(--muted);
+            transition: transform 0.3s, color 0.3s;
+        }
+
+        /* =========================================
+           SEZIONE PORTFOLIO
+           ========================================= */
         .portfolio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
 
         .project {
@@ -238,11 +329,9 @@
            🔴 REGOLE RESPONSIVE PER SMARTPHONE
            ========================================= */
         @media (max-width: 800px) {
-            /* Navbar e Hamburger Menu */
             .hamburger { display: flex; }
             .nav { padding: 15px 20px; }
 
-            /* Il menu a tutto schermo nascosto */
             .nav-links {
                 position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
                 background: rgba(10, 10, 13, 0.98); backdrop-filter: blur(15px);
@@ -253,12 +342,10 @@
             .nav-links.active { transform: translateY(0); opacity: 1; visibility: visible; }
             .nav-links a { font-size: 2rem; }
 
-            /* Animazione X per Hamburger */
             .hamburger.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
             .hamburger.active span:nth-child(2) { opacity: 0; }
             .hamburger.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
 
-            /* Aggiustamenti layout */
             .container { padding: 50px 15px; }
             .hero { min-height: auto; padding-top: 40px; }
             .hero-grid, .about-grid { grid-template-columns: 1fr; gap: 35px; }
@@ -308,6 +395,7 @@
         <div class="nav-links" id="nav-links">
             <a href="#home">Home</a>
             <a href="#about">Studio</a>
+            <a href="#servizi">Servizi</a>
             <a href="#portfolio">Portfolio</a>
         </div>
     </nav>
@@ -355,11 +443,83 @@
         </div>
     </section>
 
+    <section id="servizi">
+        <div class="container">
+            <div class="section-head reveal">
+                <div>
+                    <div class="eyebrow">Cosa facciamo</div>
+                    <h2>I Nostri<br>Servizi</h2>
+                </div>
+                <p>Dalla pre-produzione al lancio online, copriamo ogni fase con cura artigianale e tecnologia d'avanguardia.</p>
+            </div>
+
+            <div class="services-grid">
+                <div class="service-card reveal">
+                    <div class="service-num">01</div>
+                    <div class="service-icon">🎬</div>
+                    <h3 class="service-name">Produzione Video</h3>
+                    <p class="service-desc">Video cinematografici di alto livello per brand, aziende e artisti. Dal concept alla post-produzione, creiamo immagini che parlano e che rimangono impressi.</p>
+                    <div class="service-tags">
+                        <span class="tag">Spot TV</span>
+                        <span class="tag">Brand Film</span>
+                        <span class="tag">Documentari</span>
+                        <span class="tag">Social Content</span>
+                    </div>
+                    <div class="service-arrow">↗</div>
+                </div>
+
+                <div class="service-card reveal" style="transition-delay: 0.1s;">
+                    <div class="service-num">02</div>
+                    <div class="service-icon">🌐</div>
+                    <h3 class="service-name">Siti Web</h3>
+                    <p class="service-desc">Design e sviluppo di siti web su misura, veloci, eleganti e ottimizzati. Esperienze digitali che convertono visitatori in clienti.</p>
+                    <div class="service-tags">
+                        <span class="tag">Landing Page</span>
+                        <span class="tag">E-commerce</span>
+                        <span class="tag">Portfolio</span>
+                        <span class="tag">Web App</span>
+                    </div>
+                    <div class="service-arrow">↗</div>
+                </div>
+
+                <div class="service-card reveal" style="transition-delay: 0.2s;">
+                    <div class="service-num">03</div>
+                    <div class="service-icon">🎨</div>
+                    <h3 class="service-name">Motion Design</h3>
+                    <p class="service-desc">Animazioni, titoli cinematografici e grafiche in movimento che aggiungono profondità e stile professionale a ogni produzione.</p>
+                    <div class="service-tags">
+                        <span class="tag">Animazioni 2D/3D</span>
+                        <span class="tag">VFX</span>
+                        <span class="tag">Titoli</span>
+                        <span class="tag">Infografiche</span>
+                    </div>
+                    <div class="service-arrow">↗</div>
+                </div>
+
+                <div class="service-card reveal" style="transition-delay: 0.3s;">
+                    <div class="service-num">04</div>
+                    <div class="service-icon">🎞️</div>
+                    <h3 class="service-name">Post-Produzione</h3>
+                    <p class="service-desc">Montaggio cinematografico, color grading professionale e sound design per materiale già girato che necessita di quel tocco definitivo.</p>
+                    <div class="service-tags">
+                        <span class="tag">Montaggio</span>
+                        <span class="tag">Color Grading</span>
+                        <span class="tag">Sound Design</span>
+                        <span class="tag">DCP</span>
+                    </div>
+                    <div class="service-arrow">↗</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section id="portfolio">
         <div class="container">
             <div class="section-head reveal">
-                <div class="eyebrow">Lavori Selezionati</div>
-                <h2>Il mio Portfolio.</h2>
+                <div>
+                    <div class="eyebrow">Lavori Selezionati</div>
+                    <h2>Il mio Portfolio.</h2>
+                </div>
             </div>
 
             <div class="portfolio-grid">
@@ -402,7 +562,6 @@
 <script>
     const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.matchMedia("(pointer: coarse)").matches);
 
-    // 🔴 NUOVO: LOGICA HAMBURGER MENU MOBILE
     const hamburger = document.getElementById('hamburger');
     const navLinksMenu = document.getElementById('nav-links');
     const navItems = document.querySelectorAll('.nav-links a');
@@ -411,7 +570,6 @@
         hamburger.addEventListener('click', () => {
             hamburger.classList.toggle('active');
             navLinksMenu.classList.toggle('active');
-            // Blocca lo scroll del sito quando il menu è aperto a tutto schermo
             if(navLinksMenu.classList.contains('active')) {
                 document.body.style.overflow = 'hidden';
             } else {
@@ -419,7 +577,6 @@
             }
         });
 
-        // Chiude il menu quando clicchi su un link per andare a una sezione
         navItems.forEach(item => {
             item.addEventListener('click', () => {
                 hamburger.classList.remove('active');
@@ -429,14 +586,12 @@
         });
     }
 
-    // ANIMAZIONE DI SCORRIMENTO
     const reveals = document.querySelectorAll('.reveal');
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
     }, { threshold: 0.15 });
     reveals.forEach(el => observer.observe(el));
 
-    // GESTIONE MODAL
     const modal = document.getElementById("projectModal");
     function openModal(title, description, imageUrl) {
         document.getElementById("modalTitle").innerText = title;
@@ -450,7 +605,6 @@
     }
     window.onclick = (e) => { if (e.target == modal) closeModal(); }
 
-    // PROGRESS BAR
     window.addEventListener('scroll', () => {
         const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
         const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
@@ -458,12 +612,10 @@
         document.getElementById("progress-bar").style.width = scrolled + "%";
     });
 
-    // HEADER INTELLIGENTE
     let lastScrollTop = 0;
     const header = document.getElementById('main-header');
     window.addEventListener('scroll', () => {
         let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        // Evitiamo che l'header sparisca se il menu mobile è aperto
         if (scrollTop > lastScrollTop && scrollTop > 100 && !navLinksMenu.classList.contains('active')) {
             header.classList.add('hide');
         } else {
@@ -472,7 +624,6 @@
         lastScrollTop = scrollTop;
     });
 
-    // EFFETTI PC (NO TOUCH)
     if (!isTouchDevice) {
         const glow = document.getElementById('cursorGlow');
         glow.style.display = 'block';

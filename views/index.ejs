@@ -111,7 +111,7 @@
         }
 
         /* =========================================
-           🔴 NUOVO: SEZIONE CHI SIAMO (STUDIO)
+           SEZIONE CHI SIAMO (STUDIO)
            ========================================= */
         .about-grid {
             display: grid;
@@ -126,7 +126,6 @@
             position: relative;
             border-radius: 30px;
             padding: 10px;
-            /* Bordo rosa coordinato alle card */
             border: 1px solid rgba(255, 95, 135, 0.3);
             background: rgba(255, 255, 255, 0.02);
         }
@@ -141,11 +140,10 @@
         }
         .about-image-wrapper:hover img { filter: grayscale(0%); }
 
-        /* Elemento decorativo dinamico */
         .about-image-wrapper::after {
             content: "";
             position: absolute;
-            -z-index: -1;
+            z-index: -1;
             top: 20px;
             left: -20px;
             width: 100%;
@@ -156,7 +154,7 @@
         }
 
         /* =========================================
-           SEZIONE PORTFOLIO (SISTEMATA)
+           SEZIONE PORTFOLIO
            ========================================= */
         .section-head { margin-bottom: 40px; }
         .section-head h2 { font-size: clamp(2rem, 4vw, 3.4rem); letter-spacing: -0.04em; }
@@ -210,7 +208,7 @@
 
         @media (max-width: 800px) {
             .hero-grid, .about-grid { grid-template-columns: 1fr; gap: 40px; }
-            .about-grid { display: flex; flex-direction: column-reverse; } /* Testo sopra immagine su mobile */
+            .about-grid { display: flex; flex-direction: column-reverse; }
             h1 { font-size: 3rem; }
             .nav { flex-direction: column; }
         }
@@ -259,17 +257,12 @@
         <div class="container">
             <div class="about-grid">
                 <div class="about-image-wrapper reveal">
-                    <img src="https://images.unsplash.com/photo-1492691523567-6170f2295b21?auto=format&fit=crop&q=80&w=800" alt="ULiAN Studio Interno">
+                    <img src="<%= about.image_url %>" alt="ULiAN Studio">
                 </div>
                 <div class="about-content reveal">
                     <div class="eyebrow">L'Essenza dello Studio</div>
-                    <h2>Oltre lo scatto, <br><span class="gradient-text">costruiamo identità.</span></h2>
-                    <p>
-                        ULiAN nasce dalla necessità di unire l'arte della fotografia tradizionale alle dinamiche veloci dei nuovi media. Non ci limitiamo a "fare foto", ma progettiamo il modo in cui il mondo percepisce il tuo brand.
-                    </p>
-                    <p>
-                        Ogni progetto è un pezzo unico, curato con un approccio sartoriale dove la luce e la composizione diventano strumenti strategici di marketing.
-                    </p>
+                    <h2><%= about.title %></h2>
+                    <p style="white-space: pre-wrap;"><%= about.description %></p>
                     <a href="#portfolio" class="btn">Scopri il metodo</a>
                 </div>
             </div>
@@ -321,20 +314,17 @@
 </footer>
 
 <script>
-    // 1. Reveal Animation
     const reveals = document.querySelectorAll('.reveal');
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
     }, { threshold: 0.15 });
     reveals.forEach(el => observer.observe(el));
 
-    // 2. Cursor Glow
     const glow = document.getElementById('cursorGlow');
     window.addEventListener('mousemove', (e) => {
         glow.style.left = e.clientX + 'px'; glow.style.top = e.clientY + 'px';
     });
 
-    // 3. Tilt Card
     const tiltCard = document.getElementById('tiltCard');
     tiltCard.addEventListener('mousemove', (e) => {
         const rect = tiltCard.getBoundingClientRect();
@@ -344,7 +334,6 @@
     });
     tiltCard.addEventListener('mouseleave', () => { tiltCard.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)'; });
 
-    // 4. Modal Logic
     const modal = document.getElementById("projectModal");
     function openModal(title, description, imageUrl) {
         document.getElementById("modalTitle").innerText = title;

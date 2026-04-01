@@ -34,6 +34,11 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
+const db = createClient({
+    url: process.env.TURSO_DATABASE_URL,
+    authToken: process.env.TURSO_AUTH_TOKEN,
+});
+
 const uploadToCloudinary = (fileBuffer, folder) => {
     return new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream({ folder: folder }, (error, result) => {
@@ -73,18 +78,18 @@ async function inizializzaDatabase() {
 
 inizializzaDatabase();
 
-// --- FUNZIONE PER NORMALIZZARE LE IMMAGINI ---
-// Trasforma i dati vecchi e nuovi in un Array garantito per il frontend
+// --- FUNZIONE PER NORMALIZZARE LE IMMAGINI (Resa ultra-sicura) ---
 function parseProjects(rows) {
+    if (!rows) return [];
     return rows.map(p => {
         let imagesArray = [];
-        try {
-            // Prova a leggere come JSON (Nuovi progetti con più foto)
-            imagesArray = JSON.parse(p.image_url);
-            if (!Array.isArray(imagesArray)) imagesArray = [p.image_url];
-        } catch (e) {
-            // Se fallisce, era una vecchia stringa singola
-            imagesArray = [p.image_url];
+        if (p.image_url) {
+            try {
+                imagesArray = JSON.parse(p.image_url);
+                if (!Array.isArray(imagesArray)) imagesArray = [p.image_url];
+            } catch (e) {
+                imagesArray = [p.image_url];
+            }
         }
         return { ...p, images: imagesArray };
     });
@@ -101,7 +106,10 @@ app.get('/', async (req, res) => {
         const projectsWithImages = parseProjects(projectsResult.rows);
 
         res.render('index', { projects: projectsWithImages, about: aboutResult.rows[0], services: servicesResult.rows });
-    } catch (err) { res.status(500).send("Errore server."); }
+    } catch (err) {
+        // LO SCANNER: Ora se qualcosa si rompe lo scriverà in pagina
+        res.status(500).send(`<h1>Errore sulla Home</h1><p style="color:red;">${err.message}</p><pre style="background:#eee;padding:15px;">${err.stack}</pre>`);
+    }
 });
 
 app.get('/login', (req, res) => res.render('login'));
@@ -114,7 +122,7 @@ app.post('/login', async (req, res) => {
         const isMatch = await bcrypt.compare(password, result.rows[0].password);
         if (isMatch) { req.session.isLoggedIn = true; res.redirect('/dashboard'); }
         else { res.send("Credenziali errate."); }
-    } catch (err) { res.status(500).send("Errore server."); }
+    } catch (err) { res.status(500).send(`Errore Login: ${err.message}`); }
 });
 
 app.get('/dashboard', async (req, res) => {
@@ -127,7 +135,10 @@ app.get('/dashboard', async (req, res) => {
         const projectsWithImages = parseProjects(projectsResult.rows);
 
         res.render('dashboard', { projects: projectsWithImages, about: aboutResult.rows[0], services: servicesResult.rows });
-    } catch (err) { res.status(500).send("Errore dashboard."); }
+    } catch (err) {
+        // LO SCANNER ATTIVO ANCHE QUI
+        res.status(500).send(`<h1>Errore sulla Dashboard</h1><p style="color:red;">${err.message}</p><pre style="background:#eee;padding:15px;">${err.stack}</pre>`);
+    }
 });
 
 app.post('/update-about', upload.single('about_image'), async (req, res) => {
@@ -140,7 +151,7 @@ app.post('/update-about', upload.single('about_image'), async (req, res) => {
             await db.execute(`UPDATE about SET title = ?, description = ? WHERE id = 1`, [req.body.about_title, req.body.about_description]);
         }
         res.redirect('/dashboard');
-    } catch (err) { res.status(500).send("Errore aggiornamento."); }
+    } catch (err) { res.status(500).send(`Errore aggiornamento About: ${err.message}`); }
 });
 
 app.post('/add-service', async (req, res) => {
@@ -148,7 +159,7 @@ app.post('/add-service', async (req, res) => {
     try {
         await db.execute(`INSERT INTO services (title, icon, description, tags) VALUES (?, ?, ?, ?)`, [req.body.title, req.body.icon, req.body.description, req.body.tags]);
         res.redirect('/dashboard');
-    } catch (err) { res.status(500).send("Errore aggiunta servizio."); }
+    } catch (err) { res.status(500).send(`Errore aggiunta servizio: ${err.message}`); }
 });
 
 app.post('/delete-service/:id', async (req, res) => {
@@ -156,26 +167,21 @@ app.post('/delete-service/:id', async (req, res) => {
     try {
         await db.execute(`DELETE FROM services WHERE id = ?`, [req.params.id]);
         res.redirect('/dashboard');
-    } catch (err) { res.status(500).send("Errore eliminazione."); }
+    } catch (err) { res.status(500).send(`Errore eliminazione servizio: ${err.message}`); }
 });
 
-// 🔴 MODIFICATO: Rotta Progetti Multi-Immagine
-// Accetta fino a 10 immagini tramite l'input "images"
 app.post('/add-project', upload.array('images', 10), async (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect('/login');
     try {
         if (!req.files || req.files.length === 0) return res.status(400).send("Almeno un'immagine obbligatoria!");
 
-        // Carica tutte le immagini su Cloudinary in parallelo
         const uploadPromises = req.files.map(file => uploadToCloudinary(file.buffer, "portfolio"));
         const finalImageUrls = await Promise.all(uploadPromises);
-
-        // Salva l'array di URL come stringa JSON nel database
         const imagesJsonString = JSON.stringify(finalImageUrls);
 
         await db.execute(`INSERT INTO projects (title, description, image_url, featured) VALUES (?, ?, ?, 0)`, [req.body.title, req.body.description, imagesJsonString]);
         res.redirect('/dashboard');
-    } catch (err) { res.status(500).send("Errore aggiunta progetto."); }
+    } catch (err) { res.status(500).send(`Errore aggiunta progetto: ${err.message}`); }
 });
 
 app.post('/delete-project/:id', async (req, res) => {
@@ -183,7 +189,7 @@ app.post('/delete-project/:id', async (req, res) => {
     try {
         await db.execute(`DELETE FROM projects WHERE id = ?`, [req.params.id]);
         res.redirect('/dashboard');
-    } catch (err) { res.status(500).send("Errore eliminazione."); }
+    } catch (err) { res.status(500).send(`Errore eliminazione progetto: ${err.message}`); }
 });
 
 app.listen(PORT, () => console.log(`🚀 Server avviato sulla porta ${PORT}`));

@@ -43,11 +43,13 @@
         .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); border: none; box-shadow: 0 12px 30px rgba(255,95,135,0.25); }
         .btn:hover { opacity: 0.9; }
 
-        /* Manteniamo le classi per i tag eyebrow nel resto del sito */
         .eyebrow { display: inline-flex; gap: 10px; align-items: center; padding: 10px 14px; border: 1px solid rgba(255,255,255,0.08); border-radius: 999px; background: rgba(255,255,255,0.03); color: var(--muted); margin-bottom: 22px; font-size: 0.92rem; }
         .eyebrow::before { content: ""; width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 18px var(--accent); }
 
-        .hero { min-height: 80vh; display: flex; align-items: center; position: relative; }
+        /* 🔴 MODIFICA: Ridotto spazio superiore e altezza della Hero */
+        .hero { min-height: 60vh; display: flex; align-items: center; position: relative; }
+        .hero .container { padding-top: 30px; padding-bottom: 40px; }
+
         .hero-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 40px; align-items: center; width: 100%; }
         h1 { font-size: clamp(2.5rem, 8vw, 5rem); line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 22px; }
         .hero p { font-size: 1.08rem; color: var(--muted); max-width: 640px; margin-bottom: 30px; }
@@ -122,17 +124,21 @@
             .hamburger.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
             .hamburger.active span:nth-child(2) { opacity: 0; }
             .hamburger.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
-            .container { padding: 50px 15px; } .hero { min-height: auto; padding-top: 40px; }
+
+            /* 🔴 MODIFICA: Ridotto spazio superiore su Mobile */
+            .container { padding: 50px 15px; }
+            .hero { min-height: auto; padding-top: 10px; }
+            .hero .container { padding-top: 20px; padding-bottom: 20px; }
+
             .hero-grid, .about-grid { grid-template-columns: 1fr; gap: 35px; } .about-grid { display: flex; flex-direction: column-reverse; }
             h1 { font-size: 2.6rem; text-align: center; } .hero p { text-align: center; margin: 0 auto 25px auto; font-size: 1.05rem; }
             .hero .reveal { display: flex; flex-direction: column; align-items: center; } .scroll-down { display: none; }
             .about-content { text-align: center; } .about-image-wrapper::after { top: 10px; left: -10px; }
             .section-head { text-align: center; } .section-head p { margin: 0 auto; } .eyebrow { margin: 0 auto 15px auto; }
 
-            /* Ottimizzazioni specifiche Modal Mobile */
             .modal-content { max-height: 98vh; }
             .modal-body { padding: 20px; } .modal-title { font-size: 1.6rem; margin-bottom: 8px;} .modal-desc { font-size: 0.95rem; }
-            .slider-btn { width: 36px; height: 36px; font-size: 1rem; } /* Frecce leggermente più compatte su mobile */
+            .slider-btn { width: 36px; height: 36px; font-size: 1rem; }
             .footer-inner { flex-direction: column; text-align: center; }
         }
     </style>
@@ -311,7 +317,6 @@
     const observer = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); }); }, { threshold: 0.15 });
     reveals.forEach(el => observer.observe(el));
 
-    // LOGICA SLIDER MODAL CON SUPPORTO SWIPE MOBILE
     const modal = document.getElementById("projectModal");
     let currentGallery = [];
     let currentIndex = 0;
@@ -366,7 +371,6 @@
         if (e.key === "ArrowLeft") changeSlide(-1);
     });
 
-    // Gestione Swipe su Mobile
     let touchStartX = 0;
     let touchEndX = 0;
     const swipeArea = document.getElementById('swipeArea');
@@ -381,9 +385,9 @@
     }, {passive: true});
 
     function handleSwipe() {
-        const threshold = 40; // Distanza minima per considerare il tocco uno swipe
-        if (touchEndX < touchStartX - threshold) changeSlide(1); // Swipe sinistra = prossima foto
-        if (touchEndX > touchStartX + threshold) changeSlide(-1); // Swipe destra = foto precedente
+        const threshold = 40;
+        if (touchEndX < touchStartX - threshold) changeSlide(1);
+        if (touchEndX > touchStartX + threshold) changeSlide(-1);
     }
 
     window.addEventListener('scroll', () => {

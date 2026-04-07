@@ -127,7 +127,7 @@ app.get('/dashboard', async (req, res) => {
             projects: projectsWithImages,
             about: aboutResult.rows[0],
             services: servicesResult.rows,
-            cloudName: process.env.CLOUDINARY_CLOUD_NAME // 🔴 Passiamo il nome a EJS
+            cloudName: process.env.CLOUDINARY_CLOUD_NAME
         });
     } catch (err) { res.status(500).send(`Errore Dashboard: ${err.message}`); }
 });
@@ -161,11 +161,10 @@ app.post('/delete-service/:id', async (req, res) => {
     } catch (err) { res.status(500).send(`Errore eliminazione servizio: ${err.message}`); }
 });
 
-// 🔴 MODIFICATA: Questa rotta ora riceve SOLO un campo di testo chiamato image_urls
 app.post('/add-project', upload.none(), async (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect('/login');
     try {
-        const imagesJsonString = req.body.image_urls; // Riceviamo l'array testuale
+        const imagesJsonString = req.body.image_urls;
 
         if (!imagesJsonString || imagesJsonString === '[]') {
             return res.status(400).send("Almeno un'immagine obbligatoria!");
@@ -174,6 +173,18 @@ app.post('/add-project', upload.none(), async (req, res) => {
         await db.execute(`INSERT INTO projects (title, description, image_url, featured) VALUES (?, ?, ?, 0)`, [req.body.title, req.body.description, imagesJsonString]);
         res.redirect('/dashboard');
     } catch (err) { res.status(500).send(`Errore aggiunta progetto: ${err.message}`); }
+});
+
+// 🔴 NUOVO: Rotta per aggiornare l'ordine dei media
+app.post('/reorder-media/:id', async (req, res) => {
+    if (!req.session.isLoggedIn) return res.redirect('/login');
+    try {
+        const newOrderJsonString = req.body.image_urls;
+        if (!newOrderJsonString) return res.status(400).send("Dati mancanti!");
+
+        await db.execute(`UPDATE projects SET image_url = ? WHERE id = ?`, [newOrderJsonString, req.params.id]);
+        res.redirect('/dashboard');
+    } catch (err) { res.status(500).send(`Errore riordino galleria: ${err.message}`); }
 });
 
 app.post('/delete-project/:id', async (req, res) => {

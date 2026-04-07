@@ -56,6 +56,16 @@
         .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.3s; border-bottom: 1px solid transparent; padding-bottom: 2px;}
         .nav-links a:hover { color: var(--white); border-color: var(--white);}
 
+        /* 🔴 NUOVO: Stili per la finestra di Riordino Media */
+        .reorder-modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+        .media-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; max-height: 50vh; overflow-y: auto; padding-right: 5px; }
+        .media-item { display: flex; align-items: center; background: rgba(0,0,0,0.3); padding: 10px 15px; border: 1px solid var(--card-border); border-radius: 8px; cursor: grab; transition: background 0.2s; }
+        .media-item:hover { background: rgba(255,255,255,0.05); }
+        .media-item.dragging { opacity: 0.5; border: 2px dashed var(--accent); }
+        .media-thumbnail { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; margin-right: 15px; background: #000; }
+        .media-list::-webkit-scrollbar { width: 6px; }
+        .media-list::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 10px; }
+
         @media (max-width: 900px) { .dashboard-wrapper { grid-template-columns: 1fr; } .form-row { grid-template-columns: 1fr; gap: 15px;} }
     </style>
 </head>
@@ -165,6 +175,12 @@
                             </span>
                         </div>
                         <div class="project-actions">
+
+                            <% if (project.images.length > 1) { %>
+                                <div id="gallery-data-<%= project.id %>" style="display:none;"><%= JSON.stringify(project.images) %></div>
+                                <button type="button" class="btn-action" onclick="openReorderModal('<%= project.id %>')" title="Scegli l'ordine e la copertina">🔄 Ordina</button>
+                            <% } %>
+
                             <form action="/delete-project/<%= project.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Eliminare definitivamente questo progetto e la sua galleria?');">
                                 <button type="submit" class="btn-action btn-delete" title="Elimina">🗑️</button>
                             </form>
@@ -182,6 +198,21 @@
 
 </div>
 
+<div id="reorderModal" class="reorder-modal">
+    <div class="dashboard-box" style="max-width: 500px; width: 100%; position:relative; margin:0;">
+        <span onclick="closeReorderModal()" style="position:absolute; right:20px; top:20px; cursor:pointer; font-size:1.8rem; color:var(--muted);">&times;</span>
+        <h2><span>🔄</span> Ordine Galleria</h2>
+        <p style="color:var(--muted); font-size:0.9rem; margin-bottom:20px;">Trascina gli elementi per riordinarli. <b>Il primo elemento in alto sarà la copertina del progetto.</b></p>
+
+        <form id="reorderForm" method="POST">
+            <ul class="media-list" id="mediaList">
+            </ul>
+            <input type="hidden" name="image_urls" id="reorderImageUrls">
+            <button type="submit" class="btn-submit" onclick="saveReorder()">Salva Ordine</button>
+        </form>
+    </div>
+</div>
+
 <div class="nav-links">
     <a href="/">← Torna al sito web pubblico</a>
 </div>
@@ -193,6 +224,7 @@
 
     const cloudName = "<%= typeof cloudName !== 'undefined' ? cloudName : '' %>";
 
+    // CARICAMENTO DIRETTO NUOVI PROGETTI SU CLOUDINARY
     if (newProjectForm) {
         newProjectForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -209,7 +241,6 @@
                     formData.append('file', files[i]);
                     formData.append('upload_preset', 'portfolio_upload');
 
-                    // 🔴 MODIFICA: endpoint 'auto' per permettere sia foto che video
                     const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
                         method: 'POST',
                         body: formData
@@ -239,6 +270,89 @@
                 submitProjectBtn.disabled = false;
             }
         });
+    }
+
+    // 🔴 NUOVO: LOGICA PER IL RIORDINO DEI MEDIA
+    const reorderModal = document.getElementById('reorderModal');
+    const mediaList = document.getElementById('mediaList');
+    const reorderForm = document.getElementById('reorderForm');
+    const reorderImageUrls = document.getElementById('reorderImageUrls');
+
+    function openReorderModal(projectId) {
+        // Imposta la rotta per il salvataggio
+        reorderForm.action = `/reorder-media/${projectId}`;
+        mediaList.innerHTML = '';
+
+        // Recupera le immagini nascoste nell'HTML
+        const dataDiv = document.getElementById('gallery-data-' + projectId);
+        const images = JSON.parse(dataDiv.innerText);
+
+        // Crea le miniature trascinabili
+        images.forEach((url, index) => {
+            const isVideo = url.match(/\.(mp4|webm|mov|ogg)$/i);
+            let thumbUrl = url;
+            if(isVideo) thumbUrl = url.replace(/\.[^/.]+$/, ".jpg"); // Estrae l'anteprima se è video
+
+            const li = document.createElement('li');
+            li.className = 'media-item';
+            li.draggable = true;
+            li.dataset.url = url; // Memorizziamo il vero URL del media
+
+            const badgeCopertina = index === 0 ? `<span style="background:var(--accent); color:white; padding:2px 6px; border-radius:4px; font-size:0.6rem; font-weight:bold; margin-left:10px;">COPERTINA ATTUALE</span>` : '';
+            const typeIcon = isVideo ? '🎥 Video' : '📷 Foto';
+
+            li.innerHTML = `
+                <span class="drag-handle" title="Trascina">☰</span>
+                <img src="${thumbUrl}" class="media-thumbnail">
+                <div style="flex-grow:1; display:flex; flex-direction:column; justify-content:center;">
+                    <span style="font-size:0.85rem; color:var(--white);">${typeIcon} ${badgeCopertina}</span>
+                </div>
+            `;
+
+            // Eventi per il Drag&Drop
+            li.addEventListener('dragstart', () => li.classList.add('dragging'));
+            li.addEventListener('dragend', () => li.classList.remove('dragging'));
+
+            mediaList.appendChild(li);
+        });
+
+        reorderModal.style.display = 'flex';
+    }
+
+    function closeReorderModal() {
+        reorderModal.style.display = 'none';
+    }
+
+    // Logica di spostamento degli elementi mentre si trascina
+    mediaList.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const afterElement = getDragAfterElementMedia(mediaList, e.clientY);
+        const dragging = document.querySelector('.media-item.dragging');
+        if (afterElement == null) {
+            mediaList.appendChild(dragging);
+        } else {
+            mediaList.insertBefore(dragging, afterElement);
+        }
+    });
+
+    function getDragAfterElementMedia(container, y) {
+        const draggableElements = [...container.querySelectorAll('.media-item:not(.dragging)')];
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    // Quando clicchiamo "Salva Ordine", raccogliamo l'ordine in cui si trovano attualmente le <li e generiamo la nuova stringa JSON
+    function saveReorder() {
+        const items = [...mediaList.querySelectorAll('.media-item')];
+        const newUrls = items.map(item => item.dataset.url);
+        reorderImageUrls.value = JSON.stringify(newUrls);
     }
 </script>
 

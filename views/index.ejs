@@ -92,6 +92,24 @@
         .gallery-dots { display: flex; gap: 3px; }
         .gallery-dots span { width: 4px; height: 4px; background: var(--white); border-radius: 50%; }
 
+        /* 🔴 NUOVO: SEZIONE CONTATTI */
+        .contact-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 40px; align-items: start; }
+
+        .contact-info { background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01)); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 40px; }
+        .contact-info h3 { font-size: 1.8rem; margin-bottom: 15px; color: var(--white); }
+        .contact-info p { color: var(--muted); margin-bottom: 30px; font-size: 1.05rem; }
+        .contact-info ul { list-style: none; padding: 0; margin-bottom: 0; }
+        .contact-info li { margin-bottom: 20px; display: flex; align-items: center; gap: 15px; color: var(--text); font-size: 1.1rem; }
+        .contact-info li:last-child { margin-bottom: 0; }
+        .contact-info li span { font-size: 1.5rem; }
+
+        .contact-form { background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01)); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 40px; }
+        .contact-form label { display: block; font-weight: 600; font-size: 0.85rem; color: var(--muted); margin-bottom: 8px; margin-top: 1.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .contact-form label:first-child { margin-top: 0; }
+        .contact-form input, .contact-form textarea { width: 100%; padding: 15px; background: rgba(0,0,0,0.2); border: 1px solid var(--card-border); color: var(--text); border-radius: 8px; font-family: 'Inter', sans-serif; box-sizing: border-box; transition: all 0.3s ease; }
+        .contact-form input:focus, .contact-form textarea:focus { outline: none; border-color: var(--accent); background: rgba(0,0,0,0.4); box-shadow: 0 0 0 3px rgba(255,95,135,0.1); }
+        .contact-form button { margin-top: 2rem; width: 100%; padding: 16px; font-size: 1.1rem; }
+
         /* MODAL E SLIDER OTTIMIZZATI PER MOBILE */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.95); backdrop-filter: blur(10px); justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; padding: 10px; }
         .modal.show { display: flex; opacity: 1; }
@@ -130,7 +148,6 @@
 
             .hero-grid, .about-grid { grid-template-columns: 1fr; gap: 35px; } .about-grid { display: flex; flex-direction: column-reverse; }
 
-            /* 🔴 MODIFICA: Testi e bottoni allineati a sinistra su Mobile per la Hero */
             h1 { font-size: 2.6rem; text-align: left; }
             .hero p { text-align: left; margin: 0 0 25px 0; font-size: 1.05rem; }
             .hero .reveal { display: flex; flex-direction: column; align-items: flex-start; }
@@ -138,6 +155,10 @@
 
             .about-content { text-align: center; } .about-image-wrapper::after { top: 10px; left: -10px; }
             .section-head { text-align: center; } .section-head p { margin: 0 auto; } .eyebrow { margin: 0 auto 15px auto; }
+
+            /* Contact form mobile */
+            .contact-grid { grid-template-columns: 1fr; gap: 30px; }
+            .contact-info, .contact-form { padding: 25px; }
 
             .modal-content { max-height: 98vh; }
             .modal-body { padding: 20px; } .modal-title { font-size: 1.6rem; margin-bottom: 8px;} .modal-desc { font-size: 0.95rem; }
@@ -165,6 +186,7 @@
             <a href="#about">Studio</a>
             <a href="#servizi">Servizi</a>
             <a href="#portfolio">Portfolio</a>
+            <a href="#contatti">Contatti</a>
         </div>
     </nav>
 </header>
@@ -271,6 +293,45 @@
                 <% } else { %>
                     <div class="empty-msg reveal">Nessun progetto presente.</div>
                 <% } %>
+            </div>
+        </div>
+    </section>
+
+    <section id="contatti">
+        <div class="container">
+            <div class="section-head reveal">
+                <div>
+                    <div class="eyebrow">Parliamo del tuo progetto</div>
+                    <h2>Contatti.</h2>
+                </div>
+                <p>Pronto a dare vita alle tue idee? Scrivimi per collaborazioni, preventivi o per un semplice saluto.</p>
+            </div>
+
+            <div class="contact-grid">
+                <div class="contact-info reveal">
+                    <h3>I miei recapiti</h3>
+                    <p>Puoi scrivermi usando il modulo qui accanto, oppure utilizzare uno dei miei contatti diretti.</p>
+                    <ul>
+                        <li><span>📧</span> ciao@ulianstudio.com</li>
+                        <li><span>📱</span> +39 123 456 7890</li>
+                        <li><span>📍</span> Milano, Italia</li>
+                    </ul>
+                </div>
+
+                <div class="contact-form reveal">
+                    <form action="https://formspree.io/f/xaqlvlgl" method="POST" onsubmit="event.preventDefault(); alert('Grazie! Il modulo grafico funziona. Per ricevere vere email, collega il form a un servizio come Formspree.');">
+                        <label>Nome Completo</label>
+                        <input type="text" name="nome" placeholder="Il tuo nome" required>
+
+                        <label>Indirizzo Email</label>
+                        <input type="email" name="email" placeholder="La tua email" required>
+
+                        <label>Come posso aiutarti?</label>
+                        <textarea name="messaggio" rows="5" placeholder="Parlami del tuo progetto..." required></textarea>
+
+                        <button type="submit" class="btn btn-primary magnetic">Invia Messaggio</button>
+                    </form>
+                </div>
             </div>
         </div>
     </section>

@@ -143,9 +143,9 @@
             <label>Descrizione</label>
             <textarea name="description" rows="4" placeholder="Descrivi il lavoro svolto..." required></textarea>
 
-            <label>Immagini (Seleziona più foto contemporaneamente)</label>
-            <input type="file" id="projectImages" accept="image/*" multiple required>
-            <small style="color: var(--accent); display: block; margin-top: 5px;">Seleziona quante foto vuoi. Verranno caricate direttamente sul cloud.</small>
+            <label>Contenuti (Foto e Video)</label>
+            <input type="file" id="projectImages" accept="image/*,video/*" multiple required>
+            <small style="color: var(--accent); display: block; margin-top: 5px;">Seleziona foto o video. Verranno caricati e compressi automaticamente.</small>
 
             <button type="submit" id="submitProjectBtn" class="btn-submit">Pubblica Galleria</button>
         </form>
@@ -161,7 +161,7 @@
                         <div class="project-info">
                             <span class="project-title"><%= project.title %></span>
                             <span class="project-desc">
-                                📷 <%= project.images.length %> Foto inserite
+                                📷 <%= project.images.length %> Contenuti inseriti
                             </span>
                         </div>
                         <div class="project-actions">
@@ -191,27 +191,26 @@
     const projectImages = document.getElementById('projectImages');
     const submitProjectBtn = document.getElementById('submitProjectBtn');
 
-    // Recuperiamo il nome del tuo Cloudinary dal server
     const cloudName = "<%= typeof cloudName !== 'undefined' ? cloudName : '' %>";
 
     if (newProjectForm) {
         newProjectForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            submitProjectBtn.innerText = 'Caricamento foto in corso... ⏳';
+            submitProjectBtn.innerText = 'Caricamento contenuti in corso... ⏳';
             submitProjectBtn.disabled = true;
 
             const files = projectImages.files;
             const uploadedUrls = [];
 
             try {
-                // Loop: Carica ogni file direttamente su Cloudinary ignorando Vercel!
                 for (let i = 0; i < files.length; i++) {
                     const formData = new FormData();
                     formData.append('file', files[i]);
-                    formData.append('upload_preset', 'portfolio_upload'); // Il preset creato prima
+                    formData.append('upload_preset', 'portfolio_upload');
 
-                    const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+                    // 🔴 MODIFICA: endpoint 'auto' per permettere sia foto che video
+                    const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
                         method: 'POST',
                         body: formData
                     });
@@ -224,17 +223,13 @@
                     }
                 }
 
-                // Creiamo un campo nascosto con i link ottenuti e li inviamo a Vercel
                 const hiddenInput = document.createElement('input');
                 hiddenInput.type = 'hidden';
                 hiddenInput.name = 'image_urls';
                 hiddenInput.value = JSON.stringify(uploadedUrls);
                 newProjectForm.appendChild(hiddenInput);
 
-                // Cancelliamo l'input dei file così il browser non li spedisce a Vercel
                 projectImages.value = '';
-
-                // Ora Vercel riceve solo testo leggerissimo
                 newProjectForm.submit();
 
             } catch (error) {

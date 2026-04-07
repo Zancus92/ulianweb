@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>ULiAN | Fotografia & Social Media</title>
-    <meta name="description" content="Portfolio di ULiAN, servizi di Fotografia & Gestione Social Media." />
+    <meta name="description" content="Portfolio di ULiAN,Fotografia & Gestione Social Media." />
 
     <style>
         :root {
@@ -48,7 +48,6 @@
 
         .hero { min-height: 60vh; display: flex; align-items: flex-start; position: relative; }
         .hero .container { padding-top: 30px; padding-bottom: 40px; }
-
         .hero-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 40px; align-items: flex-start; width: 100%; }
         h1 { font-size: clamp(2.5rem, 8vw, 5rem); line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 22px; }
         .hero p { font-size: 1.08rem; color: var(--muted); max-width: 640px; margin-bottom: 30px; }
@@ -92,9 +91,7 @@
         .gallery-dots { display: flex; gap: 3px; }
         .gallery-dots span { width: 4px; height: 4px; background: var(--white); border-radius: 50%; }
 
-        /* 🔴 NUOVO: SEZIONE CONTATTI */
         .contact-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 40px; align-items: start; }
-
         .contact-info { background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01)); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 40px; }
         .contact-info h3 { font-size: 1.8rem; margin-bottom: 15px; color: var(--white); }
         .contact-info p { color: var(--muted); margin-bottom: 30px; font-size: 1.05rem; }
@@ -110,7 +107,6 @@
         .contact-form input:focus, .contact-form textarea:focus { outline: none; border-color: var(--accent); background: rgba(0,0,0,0.4); box-shadow: 0 0 0 3px rgba(255,95,135,0.1); }
         .contact-form button { margin-top: 2rem; width: 100%; padding: 16px; font-size: 1.1rem; }
 
-        /* MODAL E SLIDER OTTIMIZZATI PER MOBILE */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.95); backdrop-filter: blur(10px); justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; padding: 10px; }
         .modal.show { display: flex; opacity: 1; }
         .modal-content { background: var(--bg-soft); border: 1px solid var(--card-border); border-radius: var(--radius); width: 100%; max-width: 900px; max-height: 95vh; overflow-y: auto; position: relative; transform: translateY(30px); transition: transform 0.4s cubic-bezier(0.2, 1, 0.3, 1); display: flex; flex-direction: column; }
@@ -118,9 +114,12 @@
         .close-modal { position: absolute; top: 12px; right: 12px; color: var(--white); font-size: 26px; cursor: pointer; z-index: 100; background: rgba(0,0,0,0.7); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s; backdrop-filter: blur(5px); }
         @media (hover: hover) and (pointer: fine) { .close-modal:hover { background: var(--accent); transform: scale(1.1); } }
 
-        /* Area Swipe su Mobile */
         .modal-img-container { position: relative; width: 100%; background: #000; display: flex; justify-content: center; align-items: center; border-top-left-radius: var(--radius); border-top-right-radius: var(--radius); min-height: 30vh; touch-action: pan-y; }
-        .modal-image { max-width: 100%; max-height: 60vh; object-fit: contain; user-select: none; -webkit-user-drag: none; }
+
+        /* 🔴 MODIFICA: CSS per le immagini e per i video nel carosello */
+        .modal-image, .modal-video { max-width: 100%; max-height: 60vh; object-fit: contain; }
+        .modal-image { user-select: none; -webkit-user-drag: none; }
+
         .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: 1px solid rgba(255,255,255,0.1); width: 44px; height: 44px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; backdrop-filter: blur(5px); transition: all 0.2s; display: none; align-items: center; justify-content: center; z-index: 10;}
         .slider-btn:hover { background: var(--accent); }
         .slider-btn.prev { left: 10px; }
@@ -132,6 +131,11 @@
         .footer-inner { max-width: var(--max); margin: 0 auto; padding: 28px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; color: var(--muted); gap: 15px;}
         .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.2, 1, 0.3, 1); }
         .reveal.visible { opacity: 1; transform: translateY(0); }
+        .mia-lista{
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
 
         @media (max-width: 800px) {
             .hamburger { display: flex; } .nav { padding: 15px 20px; }
@@ -141,25 +145,15 @@
             .hamburger.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
             .hamburger.active span:nth-child(2) { opacity: 0; }
             .hamburger.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
-
-            .container { padding: 50px 15px; }
-            .hero { min-height: auto; padding-top: 10px; }
+            .container { padding: 50px 15px; } .hero { min-height: auto; padding-top: 10px; }
             .hero .container { padding-top: 20px; padding-bottom: 20px; }
-
             .hero-grid, .about-grid { grid-template-columns: 1fr; gap: 35px; } .about-grid { display: flex; flex-direction: column-reverse; }
-
-            h1 { font-size: 2.6rem; text-align: left; }
-            .hero p { text-align: left; margin: 0 0 25px 0; font-size: 1.05rem; }
-            .hero .reveal { display: flex; flex-direction: column; align-items: flex-start; }
-            .scroll-down { display: none; }
-
+            h1 { font-size: 2.6rem; text-align: left; } .hero p { text-align: left; margin: 0 0 25px 0; font-size: 1.05rem; }
+            .hero .reveal { display: flex; flex-direction: column; align-items: flex-start; } .scroll-down { display: none; }
             .about-content { text-align: center; } .about-image-wrapper::after { top: 10px; left: -10px; }
             .section-head { text-align: center; } .section-head p { margin: 0 auto; } .eyebrow { margin: 0 auto 15px auto; }
-
-            /* Contact form mobile */
             .contact-grid { grid-template-columns: 1fr; gap: 30px; }
             .contact-info, .contact-form { padding: 25px; }
-
             .modal-content { max-height: 98vh; }
             .modal-body { padding: 20px; } .modal-title { font-size: 1.6rem; margin-bottom: 8px;} .modal-desc { font-size: 0.95rem; }
             .slider-btn { width: 36px; height: 36px; font-size: 1rem; }
@@ -197,11 +191,11 @@
             <div class="hero-grid">
                 <div class="reveal">
                     <h1>Contenuti <span class="gradient-text">visivi</span><br />che lasciano il segno.</h1>
-                    <p>creativa per brand che puntano all'eccellenza.</p>
+                    <p>direzione creativa per brand che puntano all'eccellenza.</p>
                     <a href="#portfolio" class="btn btn-primary magnetic">Esplora il Portfolio</a>
                 </div>
                 <div class="hero-card reveal" id="tiltCard">
-                    <!--<div class="mini-label"></div>-->
+                    <!--<div class="mini-label">Servizi Esclusivi</div>-->
                     <h3>Creatività che comunica.</h3>
                     <p>Dal set fotografico alla strategia social: curo l'immagine del tuo brand a 360 gradi.</p>
                 </div>
@@ -269,8 +263,17 @@
             <div class="portfolio-grid">
                 <% if (typeof projects !== 'undefined' && projects.length > 0) { %>
                     <% projects.forEach(function(project, index) { %>
+                        <%
+                            let coverUrl = project.images && project.images.length > 0 ? project.images[0] : '';
+                            let isVideo = coverUrl.match(/\.(mp4|webm|mov|ogg)$/i);
+                            if (isVideo) {
+                                // Sostituiamo l'estensione finale con .jpg per chiedere a Cloudinary la miniatura
+                                coverUrl = coverUrl.replace(/\.[^/.]+$/, ".jpg");
+                            }
+                        %>
+
                         <article class="project reveal"
-                                 style="background-image: url('<%= project.images[0] %>'); transition-delay: <%= (index % 3) * 0.1 %>s"
+                                 style="background-image: url('<%= coverUrl %>'); transition-delay: <%= (index % 3) * 0.1 %>s"
                                  data-title="<%= project.title %>"
                                  data-desc="<%= project.description %>"
                                  data-images='<%= JSON.stringify(project.images) %>'
@@ -281,7 +284,13 @@
                             <% if (project.images.length > 1) { %>
                                 <div class="gallery-indicator">
                                     <div class="gallery-dots"><span></span><span></span><span></span></div>
-                                    <%= project.images.length %> Foto
+                                    <%= project.images.length %> Contenuti
+                                </div>
+                            <% } %>
+
+                            <% if (isVideo && project.images.length === 1) { %>
+                                <div class="gallery-indicator" style="border-radius: 50%; width: 35px; height: 35px; justify-content: center;">
+                                    ▶
                                 </div>
                             <% } %>
 
@@ -309,7 +318,7 @@
             <div class="contact-grid">
                 <div class="contact-info reveal">
                     <h3>I miei recapiti</h3>
-                    <p>Puoi scrivermi usando il form, oppure utilizza uno dei miei contatti diretti.</p>
+                    <p>Puoi scrivermi usando il form, oppure utilizzando uno dei miei contatti diretti.</p>
                     <ul>
                         <li><span>📧</span> ulianeric.designer@gmail.com</li>
                         <li><span>📱</span> +39 3483762529</li>
@@ -321,13 +330,10 @@
                     <form action="https://formspree.io/f/xaqlvlgl" method="POST">
                         <label>Nome Completo</label>
                         <input type="text" name="nome" placeholder="Il tuo nome" required>
-
                         <label>Indirizzo Email</label>
                         <input type="email" name="email" placeholder="La tua email" required>
-
                         <label>Come posso aiutarti?</label>
                         <textarea name="messaggio" rows="5" placeholder="Parlami del tuo progetto..." required></textarea>
-
                         <button type="submit" class="btn btn-primary magnetic">Invia Messaggio</button>
                     </form>
                 </div>
@@ -342,7 +348,10 @@
 
         <div class="modal-img-container" id="swipeArea">
             <button class="slider-btn prev" id="btnPrev" onclick="changeSlide(-1)">❮</button>
+
             <img id="modalImg" class="modal-image" src="" alt="Progetto">
+            <video id="modalVideo" class="modal-video" controls playsinline style="display:none;"></video>
+
             <button class="slider-btn next" id="btnNext" onclick="changeSlide(1)">❯</button>
             <div class="slider-counter" id="sliderCounter">1 / 1</div>
         </div>
@@ -357,7 +366,8 @@
 <footer>
     <div class="footer-inner">
         <div>© 2026 ULiAN Studio. Tutti i diritti riservati.</div>
-        <div><ul>
+        <div>
+            <ul class="mia-lista">
                 <li><span>📧</span> ulianeric.designer@gmail.com</li>
                 <li><span>📱</span> +39 3483762529</li>
                 <li><span>📍</span> Susegana, Italia</li>
@@ -412,13 +422,33 @@
         updateSliderView();
     }
 
+    // 🔴 MODIFICA: Logica di accensione e spegnimento TV/FOTO
     function updateSliderView() {
+        const url = currentGallery[currentIndex];
+        // Controlla se l'estensione finale è da video
+        const isVideo = url.match(/\.(mp4|webm|mov|ogg)$/i);
+
         const imgElement = document.getElementById("modalImg");
-        imgElement.style.opacity = '0.5';
-        setTimeout(() => {
-            imgElement.src = currentGallery[currentIndex];
-            imgElement.style.opacity = '1';
-        }, 80);
+        const vidElement = document.getElementById("modalVideo");
+
+        if (isVideo) {
+            // Spegni la foto, accendi il video
+            imgElement.style.display = 'none';
+            vidElement.style.display = 'block';
+            vidElement.src = url;
+            vidElement.play(); // Auto-play!
+        } else {
+            // Spegni il video, accendi la foto
+            vidElement.style.display = 'none';
+            vidElement.pause();
+            imgElement.style.display = 'block';
+
+            imgElement.style.opacity = '0.5';
+            setTimeout(() => {
+                imgElement.src = url;
+                imgElement.style.opacity = '1';
+            }, 80);
+        }
 
         const showControls = currentGallery.length > 1 ? 'flex' : 'none';
         document.getElementById("btnPrev").style.display = showControls;
@@ -429,7 +459,12 @@
 
     function closeModal() {
         modal.classList.remove("show"); document.body.style.overflow = "auto";
-        setTimeout(() => { document.getElementById("modalImg").src = ""; }, 300);
+        setTimeout(() => {
+            document.getElementById("modalImg").src = "";
+            const vidElement = document.getElementById("modalVideo");
+            vidElement.pause();
+            vidElement.src = "";
+        }, 300);
     }
 
     window.onclick = (e) => { if (e.target == modal) closeModal(); }

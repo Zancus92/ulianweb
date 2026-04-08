@@ -56,7 +56,6 @@
         .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.3s; border-bottom: 1px solid transparent; padding-bottom: 2px;}
         .nav-links a:hover { color: var(--white); border-color: var(--white);}
 
-        /* 🔴 NUOVO: Stili per la finestra di Riordino Media */
         .reorder-modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
         .media-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; max-height: 50vh; overflow-y: auto; padding-right: 5px; }
         .media-item { display: flex; align-items: center; background: rgba(0,0,0,0.3); padding: 10px 15px; border: 1px solid var(--card-border); border-radius: 8px; cursor: grab; transition: background 0.2s; }
@@ -130,6 +129,14 @@
                             </div>
                         </div>
                         <div class="project-actions">
+                            <button type="button" class="btn-action"
+                                    data-id="<%= service.id %>"
+                                    data-title="<%= service.title %>"
+                                    data-icon="<%= service.icon %>"
+                                    data-desc="<%= service.description %>"
+                                    data-tags="<%= service.tags %>"
+                                    onclick="openEditServiceModal(this)" title="Modifica Servizio">✏️</button>
+
                             <form action="/delete-service/<%= service.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Sei sicuro di voler eliminare questo servizio?');">
                                 <button type="submit" class="btn-action btn-delete" title="Elimina">🗑️</button>
                             </form>
@@ -213,6 +220,29 @@
     </div>
 </div>
 
+<div id="editServiceModal" class="reorder-modal">
+    <div class="dashboard-box" style="max-width: 500px; width: 100%; position:relative; margin:0;">
+        <span onclick="closeEditServiceModal()" style="position:absolute; right:20px; top:20px; cursor:pointer; font-size:1.8rem; color:var(--muted);">&times;</span>
+        <h2><span>✏️</span> Modifica Servizio</h2>
+
+        <form id="editServiceForm" method="POST">
+            <label>Nome Servizio</label>
+            <input type="text" name="title" id="editServiceTitle" required>
+
+            <label>Icona (Usa Emoji)</label>
+            <input type="text" name="icon" id="editServiceIcon" required>
+
+            <label>Tags (separati da virgola)</label>
+            <input type="text" name="tags" id="editServiceTags">
+
+            <label>Descrizione</label>
+            <textarea name="description" rows="3" id="editServiceDesc" required></textarea>
+
+            <button type="submit" class="btn-submit">Salva Modifiche</button>
+        </form>
+    </div>
+</div>
+
 <div class="nav-links">
     <a href="/">← Torna al sito web pubblico</a>
 </div>
@@ -272,31 +302,49 @@
         });
     }
 
-    // 🔴 NUOVO: LOGICA PER IL RIORDINO DEI MEDIA
+    // 🔴 NUOVO: LOGICA PER MODIFICA SERVIZI
+    const editServiceModal = document.getElementById('editServiceModal');
+    const editServiceForm = document.getElementById('editServiceForm');
+
+    function openEditServiceModal(btn) {
+        // Prendi i dati dai data-attribute del bottone premuto
+        const id = btn.getAttribute('data-id');
+        document.getElementById('editServiceTitle').value = btn.getAttribute('data-title');
+        document.getElementById('editServiceIcon').value = btn.getAttribute('data-icon');
+        document.getElementById('editServiceDesc').value = btn.getAttribute('data-desc');
+        document.getElementById('editServiceTags').value = btn.getAttribute('data-tags');
+
+        // Imposta l'azione del form verso l'ID corretto
+        editServiceForm.action = `/edit-service/${id}`;
+        editServiceModal.style.display = 'flex';
+    }
+
+    function closeEditServiceModal() {
+        editServiceModal.style.display = 'none';
+    }
+
+    // LOGICA PER IL RIORDINO DEI MEDIA
     const reorderModal = document.getElementById('reorderModal');
     const mediaList = document.getElementById('mediaList');
     const reorderForm = document.getElementById('reorderForm');
     const reorderImageUrls = document.getElementById('reorderImageUrls');
 
     function openReorderModal(projectId) {
-        // Imposta la rotta per il salvataggio
         reorderForm.action = `/reorder-media/${projectId}`;
         mediaList.innerHTML = '';
 
-        // Recupera le immagini nascoste nell'HTML
         const dataDiv = document.getElementById('gallery-data-' + projectId);
         const images = JSON.parse(dataDiv.innerText);
 
-        // Crea le miniature trascinabili
         images.forEach((url, index) => {
             const isVideo = url.match(/\.(mp4|webm|mov|ogg)$/i);
             let thumbUrl = url;
-            if(isVideo) thumbUrl = url.replace(/\.[^/.]+$/, ".jpg"); // Estrae l'anteprima se è video
+            if(isVideo) thumbUrl = url.replace(/\.[^/.]+$/, ".jpg");
 
             const li = document.createElement('li');
             li.className = 'media-item';
             li.draggable = true;
-            li.dataset.url = url; // Memorizziamo il vero URL del media
+            li.dataset.url = url;
 
             const badgeCopertina = index === 0 ? `<span style="background:var(--accent); color:white; padding:2px 6px; border-radius:4px; font-size:0.6rem; font-weight:bold; margin-left:10px;">COPERTINA ATTUALE</span>` : '';
             const typeIcon = isVideo ? '🎥 Video' : '📷 Foto';
@@ -309,7 +357,6 @@
                 </div>
             `;
 
-            // Eventi per il Drag&Drop
             li.addEventListener('dragstart', () => li.classList.add('dragging'));
             li.addEventListener('dragend', () => li.classList.remove('dragging'));
 
@@ -323,7 +370,6 @@
         reorderModal.style.display = 'none';
     }
 
-    // Logica di spostamento degli elementi mentre si trascina
     mediaList.addEventListener('dragover', (e) => {
         e.preventDefault();
         const afterElement = getDragAfterElementMedia(mediaList, e.clientY);
@@ -348,7 +394,6 @@
         }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
 
-    // Quando clicchiamo "Salva Ordine", raccogliamo l'ordine in cui si trovano attualmente le <li e generiamo la nuova stringa JSON
     function saveReorder() {
         const items = [...mediaList.querySelectorAll('.media-item')];
         const newUrls = items.map(item => item.dataset.url);

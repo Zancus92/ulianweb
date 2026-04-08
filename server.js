@@ -153,6 +153,18 @@ app.post('/add-service', async (req, res) => {
     } catch (err) { res.status(500).send(`Errore aggiunta servizio: ${err.message}`); }
 });
 
+// 🔴 NUOVO: Rotta per Modificare un Servizio
+app.post('/edit-service/:id', async (req, res) => {
+    if (!req.session.isLoggedIn) return res.redirect('/login');
+    try {
+        await db.execute(
+            `UPDATE services SET title = ?, icon = ?, description = ?, tags = ? WHERE id = ?`,
+            [req.body.title, req.body.icon, req.body.description, req.body.tags, req.params.id]
+        );
+        res.redirect('/dashboard');
+    } catch (err) { res.status(500).send(`Errore modifica servizio: ${err.message}`); }
+});
+
 app.post('/delete-service/:id', async (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect('/login');
     try {
@@ -175,7 +187,6 @@ app.post('/add-project', upload.none(), async (req, res) => {
     } catch (err) { res.status(500).send(`Errore aggiunta progetto: ${err.message}`); }
 });
 
-// 🔴 NUOVO: Rotta per aggiornare l'ordine dei media
 app.post('/reorder-media/:id', async (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect('/login');
     try {

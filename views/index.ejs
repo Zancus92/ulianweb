@@ -21,6 +21,10 @@
         a { color: inherit; text-decoration: none; }
         button, a, .project, .close-modal, .slider-btn { touch-action: manipulation; }
 
+        .letterarosa{
+            color: #ff7aa1;
+        }
+
         .noise { position: fixed; inset: 0; pointer-events: none; opacity: 0.035; background-image: radial-gradient(circle, #fff 0.8px, transparent 0.8px); background-size: 12px 12px; z-index: 1; }
         .cursor-glow { display: none; position: fixed; width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(circle, rgba(255,95,135,0.18), transparent 65%); pointer-events: none; transform: translate(-50%, -50%); z-index: 0; filter: blur(18px); }
         #progress-bar { position: fixed; top: 0; left: 0; width: 0%; height: 3px; background: linear-gradient(90deg, var(--accent), var(--gold)); z-index: 9999; transition: width 0.1s ease; }
@@ -128,7 +132,6 @@
 
         .modal-body { padding: 30px; }
 
-        /* 🔴 NUOVO FOOTER CSS */
         footer { border-top: 1px solid rgba(255,255,255,0.06); background: rgba(10,10,13,0.8); margin-top: 40px; padding: 50px 0; }
         .footer-inner { max-width: var(--max); margin: 0 auto; padding: 0 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; align-items: start; color: var(--muted); }
         .footer-col { display: flex; flex-direction: column; gap: 15px; }
@@ -137,22 +140,30 @@
         .admin-link { color: var(--muted); font-size: 0.85rem; text-decoration: none; transition: color 0.3s; display: inline-block; }
         .admin-link:hover { color: var(--white); }
 
-        /* Bottone WhatsApp in CSS */
-        .btn-whatsapp {
+        .btn-whatsapp { background: linear-gradient(135deg, #25D366, #128C7E); color: white; border: none; box-shadow: 0 12px 30px rgba(37, 211, 102, 0.2); display: inline-flex; align-items: center; gap: 10px; padding: 12px 22px; border-radius: 999px; font-weight: 600; transition: all 0.3s ease; width: fit-content; }
+        .btn-whatsapp:hover { opacity: 0.9; transform: translateY(-3px); box-shadow: 0 15px 35px rgba(37, 211, 102, 0.3); }
+
+        /* 🔴 NUOVO: Stile per il bottone WhatsApp Sticky */
+        .whatsapp-sticky {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
             background: linear-gradient(135deg, #25D366, #128C7E);
             color: white;
-            border: none;
-            box-shadow: 0 12px 30px rgba(37, 211, 102, 0.2);
-            display: inline-flex;
+            border-radius: 50%;
+            display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 12px 22px;
-            border-radius: 999px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            width: fit-content;
+            justify-content: center;
+            box-shadow: 0 10px 25px rgba(37, 211, 102, 0.4);
+            z-index: 900;
+            transition: transform 0.3s cubic-bezier(0.2, 1, 0.3, 1), box-shadow 0.3s;
         }
-        .btn-whatsapp:hover { opacity: 0.9; transform: translateY(-3px); box-shadow: 0 15px 35px rgba(37, 211, 102, 0.3); }
+        .whatsapp-sticky:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(37, 211, 102, 0.6);
+        }
 
         .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.2, 1, 0.3, 1); }
         .reveal.visible { opacity: 1; transform: translateY(0); }
@@ -179,6 +190,14 @@
             .slider-btn { width: 36px; height: 36px; font-size: 1rem; }
             .footer-inner { grid-template-columns: 1fr; text-align: center; gap: 30px; }
             .footer-col { align-items: center; }
+
+            /* Adatta il bottone sticky su mobile */
+            .whatsapp-sticky {
+                bottom: 20px;
+                right: 20px;
+                width: 55px;
+                height: 55px;
+            }
         }
     </style>
 </head>
@@ -191,7 +210,7 @@
     <nav class="nav">
         <a href="/" class="brand">
             <div class="brand-text">
-                <span style="color: var(--white); font-size: 1.2rem; font-weight: 800;">ULiAN</span>
+                <span style="color: var(--white); font-size: 1.2rem; font-weight: 800;">UL<span class="letterarosa">i</span>AN</span>
                 <span>Studio Visivo</span>
             </div>
         </a>
@@ -337,9 +356,9 @@
                     <h3>I miei recapiti</h3>
                     <p>Puoi scrivermi usando il form, oppure utilizzando uno dei miei contatti diretti.</p>
                     <ul>
-                        <li><span>📧</span> ulianeric.designer@gmail.com</li>
-                        <li><span>📱</span> +39 3483762529</li>
-                        <li><span>📍</span> Susegana, Italia</li>
+                        <li>ulianeric.designer@gmail.com</li>
+                        <li>+39 3483762529</li>
+                        <li>Susegana, Italia</li>
                     </ul>
                 </div>
 
@@ -382,7 +401,6 @@
 
 <footer>
     <div class="footer-inner">
-
         <div class="footer-col">
             <div class="brand-text" style="margin-bottom: 5px;">
                 <span style="color: var(--white); font-size: 1.2rem; font-weight: 800;">ULiAN</span>
@@ -395,7 +413,6 @@
         <div class="footer-col">
             <ul class="mia-lista footer-contacts">
                 <li>ulianeric.designer@gmail.com</li>
-                <li>P.Iva - 05525120266</li>
                 <li>+39 348 376 2529</li>
                 <li>Susegana, Italia</li>
             </ul>
@@ -406,12 +423,17 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.305-.881-.653-1.474-1.46-1.647-1.758-.173-.298-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.347-.272.297-1.04 1.016-1.04 2.479 0 1.463 1.065 2.876 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
                 </svg>
-                Chatta su WhatsApp
+                Ciao, ti contatto per
             </a>
         </div>
-
     </div>
 </footer>
+
+<a href="https://wa.me/393483762529" target="_blank" class="whatsapp-sticky magnetic" aria-label="Chatta su WhatsApp">
+    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.305-.881-.653-1.474-1.46-1.647-1.758-.173-.298-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.347-.272.297-1.04 1.016-1.04 2.479 0 1.463 1.065 2.876 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+    </svg>
+</a>
 
 <script>
     const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.matchMedia("(pointer: coarse)").matches);

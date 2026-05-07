@@ -47,11 +47,9 @@
         .eyebrow { display: inline-flex; gap: 10px; align-items: center; padding: 10px 14px; border: 1px solid rgba(255,255,255,0.08); border-radius: 999px; background: rgba(255,255,255,0.03); color: var(--muted); margin-bottom: 22px; font-size: 0.92rem; }
         .eyebrow::before { content: ""; width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 18px var(--accent); }
 
-        /* 🔴 MODIFICA: Ridotto spazio vuoto per avvicinare le sezioni */
         .hero { min-height: 45vh; display: flex; align-items: flex-start; position: relative; }
         .hero .container { padding-top: 30px; padding-bottom: 10px; }
         #about .container { padding-top: 20px; }
-
         .hero-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 40px; align-items: flex-start; width: 100%; }
         h1 { font-size: clamp(2.5rem, 8vw, 5rem); line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 22px; }
         .hero p { font-size: 1.08rem; color: var(--muted); max-width: 640px; margin-bottom: 30px; }
@@ -129,11 +127,35 @@
         .slider-counter { position: absolute; bottom: 12px; right: 12px; background: rgba(0,0,0,0.7); color: white; padding: 4px 10px; border-radius: 15px; font-size: 0.8rem; display: none; z-index: 10; backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.1); }
 
         .modal-body { padding: 30px; }
-        footer { border-top: 1px solid rgba(255,255,255,0.06); background: rgba(10,10,13,0.8); margin-top: 40px; }
-        .footer-inner { max-width: var(--max); margin: 0 auto; padding: 28px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; color: var(--muted); gap: 15px;}
+
+        /* 🔴 NUOVO FOOTER CSS */
+        footer { border-top: 1px solid rgba(255,255,255,0.06); background: rgba(10,10,13,0.8); margin-top: 40px; padding: 50px 0; }
+        .footer-inner { max-width: var(--max); margin: 0 auto; padding: 0 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; align-items: start; color: var(--muted); }
+        .footer-col { display: flex; flex-direction: column; gap: 15px; }
+        .mia-lista { list-style: none; padding: 0; margin: 0; }
+        .footer-contacts li { margin-bottom: 8px; font-size: 0.95rem; color: var(--text); }
+        .admin-link { color: var(--muted); font-size: 0.85rem; text-decoration: none; transition: color 0.3s; display: inline-block; }
+        .admin-link:hover { color: var(--white); }
+
+        /* Bottone WhatsApp in CSS */
+        .btn-whatsapp {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+            border: none;
+            box-shadow: 0 12px 30px rgba(37, 211, 102, 0.2);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 22px;
+            border-radius: 999px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: fit-content;
+        }
+        .btn-whatsapp:hover { opacity: 0.9; transform: translateY(-3px); box-shadow: 0 15px 35px rgba(37, 211, 102, 0.3); }
+
         .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.2, 1, 0.3, 1); }
         .reveal.visible { opacity: 1; transform: translateY(0); }
-        .mia-lista{ list-style: none; padding: 0; margin: 0; }
 
         @media (max-width: 800px) {
             .hamburger { display: flex; } .nav { padding: 15px 20px; }
@@ -143,13 +165,8 @@
             .hamburger.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
             .hamburger.active span:nth-child(2) { opacity: 0; }
             .hamburger.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
-
-            /* 🔴 MODIFICA: Spazi ravvicinati ottimizzati per Mobile */
-            .container { padding: 50px 15px; }
-            .hero { min-height: auto; padding-top: 10px; }
-            .hero .container { padding-top: 20px; padding-bottom: 0px; }
-            #about .container { padding-top: 15px; }
-
+            .container { padding: 50px 15px; } .hero { min-height: auto; padding-top: 10px; }
+            .hero .container { padding-top: 20px; padding-bottom: 20px; }
             .hero-grid, .about-grid { grid-template-columns: 1fr; gap: 35px; } .about-grid { display: flex; flex-direction: column-reverse; }
             h1 { font-size: 2.6rem; text-align: left; } .hero p { text-align: left; margin: 0 0 25px 0; font-size: 1.05rem; }
             .hero .reveal { display: flex; flex-direction: column; align-items: flex-start; } .scroll-down { display: none; }
@@ -160,7 +177,8 @@
             .modal-content { max-height: 98vh; }
             .modal-body { padding: 20px; } .modal-title { font-size: 1.6rem; margin-bottom: 8px;} .modal-desc { font-size: 0.95rem; }
             .slider-btn { width: 36px; height: 36px; font-size: 1rem; }
-            .footer-inner { flex-direction: column; text-align: center; }
+            .footer-inner { grid-template-columns: 1fr; text-align: center; gap: 30px; }
+            .footer-col { align-items: center; }
         }
     </style>
 </head>
@@ -364,15 +382,34 @@
 
 <footer>
     <div class="footer-inner">
-        <div>© 2026 ULiAN Studio. Tutti i diritti riservati.</div>
-        <div>
-            <ul class="mia-lista">
-                <li><span>📧</span> ulianeric.designer@gmail.com</li>
-                <li><span>📱</span> +39 3483762529</li>
-                <li><span>📍</span> Susegana, Italia</li>
+
+        <div class="footer-col">
+            <div class="brand-text" style="margin-bottom: 5px;">
+                <span style="color: var(--white); font-size: 1.2rem; font-weight: 800;">ULiAN</span>
+                <span>Studio Visivo</span>
+            </div>
+            <div>© 2026 Tutti i diritti riservati.</div>
+            <a href="/login" class="admin-link">Accesso Amministratore</a>
+        </div>
+
+        <div class="footer-col">
+            <ul class="mia-lista footer-contacts">
+                <li>ulianeric.designer@gmail.com</li>
+                <li>P.Iva - 05525120266</li>
+                <li>+39 348 376 2529</li>
+                <li>Susegana, Italia</li>
             </ul>
         </div>
-        <a href="/login" class="admin-link magnetic">⚙️ Accesso Amministratore</a>
+
+        <div class="footer-col">
+            <a href="https://wa.me/393483762529" target="_blank" class="btn-whatsapp magnetic">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.305-.881-.653-1.474-1.46-1.647-1.758-.173-.298-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.347-.272.297-1.04 1.016-1.04 2.479 0 1.463 1.065 2.876 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+                </svg>
+                Chatta su WhatsApp
+            </a>
+        </div>
+
     </div>
 </footer>
 

@@ -47,8 +47,11 @@
         .eyebrow { display: inline-flex; gap: 10px; align-items: center; padding: 10px 14px; border: 1px solid rgba(255,255,255,0.08); border-radius: 999px; background: rgba(255,255,255,0.03); color: var(--muted); margin-bottom: 22px; font-size: 0.92rem; }
         .eyebrow::before { content: ""; width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 18px var(--accent); }
 
-        .hero { min-height: 60vh; display: flex; align-items: flex-start; position: relative; }
-        .hero .container { padding-top: 30px; padding-bottom: 20px; }
+        /* 🔴 MODIFICA: Ridotto spazio vuoto per avvicinare le sezioni */
+        .hero { min-height: 45vh; display: flex; align-items: flex-start; position: relative; }
+        .hero .container { padding-top: 30px; padding-bottom: 10px; }
+        #about .container { padding-top: 20px; }
+
         .hero-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 40px; align-items: flex-start; width: 100%; }
         h1 { font-size: clamp(2.5rem, 8vw, 5rem); line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 22px; }
         .hero p { font-size: 1.08rem; color: var(--muted); max-width: 640px; margin-bottom: 30px; }
@@ -116,8 +119,6 @@
         @media (hover: hover) and (pointer: fine) { .close-modal:hover { background: var(--accent); transform: scale(1.1); } }
 
         .modal-img-container { position: relative; width: 100%; background: #000; display: flex; justify-content: center; align-items: center; border-top-left-radius: var(--radius); border-top-right-radius: var(--radius); min-height: 30vh; touch-action: pan-y; }
-
-        /* 🔴 MODIFICA: CSS per le immagini e per i video nel carosello */
         .modal-image, .modal-video { max-width: 100%; max-height: 60vh; object-fit: contain; }
         .modal-image { user-select: none; -webkit-user-drag: none; }
 
@@ -132,11 +133,7 @@
         .footer-inner { max-width: var(--max); margin: 0 auto; padding: 28px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; color: var(--muted); gap: 15px;}
         .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.2, 1, 0.3, 1); }
         .reveal.visible { opacity: 1; transform: translateY(0); }
-        .mia-lista{
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
+        .mia-lista{ list-style: none; padding: 0; margin: 0; }
 
         @media (max-width: 800px) {
             .hamburger { display: flex; } .nav { padding: 15px 20px; }
@@ -146,8 +143,13 @@
             .hamburger.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
             .hamburger.active span:nth-child(2) { opacity: 0; }
             .hamburger.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
-            .container { padding: 50px 15px; } .hero { min-height: auto; padding-top: 10px; }
-            .hero .container { padding-top: 20px; padding-bottom: 20px; }
+
+            /* 🔴 MODIFICA: Spazi ravvicinati ottimizzati per Mobile */
+            .container { padding: 50px 15px; }
+            .hero { min-height: auto; padding-top: 10px; }
+            .hero .container { padding-top: 20px; padding-bottom: 0px; }
+            #about .container { padding-top: 15px; }
+
             .hero-grid, .about-grid { grid-template-columns: 1fr; gap: 35px; } .about-grid { display: flex; flex-direction: column-reverse; }
             h1 { font-size: 2.6rem; text-align: left; } .hero p { text-align: left; margin: 0 0 25px 0; font-size: 1.05rem; }
             .hero .reveal { display: flex; flex-direction: column; align-items: flex-start; } .scroll-down { display: none; }
@@ -195,13 +197,11 @@
                     <a href="#portfolio" class="btn btn-primary magnetic">Esplora il Portfolio</a>
                 </div>
                 <div class="hero-card reveal" id="tiltCard">
-                    <!--<div class="mini-label">Servizi Esclusivi</div>-->
                     <h3>Creatività che comunica.</h3>
                     <p>Dal set fotografico alla strategia social: curo l'immagine del tuo brand a 360 gradi.</p>
                 </div>
             </div>
         </div>
-        <!--<div class="scroll-down"><span>Scroll</span><div class="mouse-icon"><div class="mouse-wheel"></div></div></div>-->
     </section>
 
     <section id="about">
@@ -267,7 +267,6 @@
                             let coverUrl = project.images && project.images.length > 0 ? project.images[0] : '';
                             let isVideo = coverUrl.match(/\.(mp4|webm|mov|ogg)$/i);
                             if (isVideo) {
-                                // Sostituiamo l'estensione finale con .jpg per chiedere a Cloudinary la miniatura
                                 coverUrl = coverUrl.replace(/\.[^/.]+$/, ".jpg");
                             }
                         %>
@@ -422,23 +421,19 @@
         updateSliderView();
     }
 
-    // 🔴 MODIFICA: Logica di accensione e spegnimento TV/FOTO
     function updateSliderView() {
         const url = currentGallery[currentIndex];
-        // Controlla se l'estensione finale è da video
         const isVideo = url.match(/\.(mp4|webm|mov|ogg)$/i);
 
         const imgElement = document.getElementById("modalImg");
         const vidElement = document.getElementById("modalVideo");
 
         if (isVideo) {
-            // Spegni la foto, accendi il video
             imgElement.style.display = 'none';
             vidElement.style.display = 'block';
             vidElement.src = url;
-            vidElement.play(); // Auto-play!
+            vidElement.play();
         } else {
-            // Spegni il video, accendi la foto
             vidElement.style.display = 'none';
             vidElement.pause();
             imgElement.style.display = 'block';
